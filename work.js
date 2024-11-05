@@ -6,8 +6,8 @@ const CONFIG = {
     COLLECTIONS_KEY: 'collections',
     ADMIN_USERNAME: 'admin',           
     ADMIN_PASSWORD: '123456',
-    SUB_WORKER_URL: 'https://subct.869069.xyz' , // 替换成你的域名
-    SUBSCRIBER_URL: 'https://youxuan1104.wingtroy.workers.dev/?key=ttvv00'
+    SUB_WORKER_URL: 'https://subct.869.xyz' , // 替换成你的域名
+    SUBSCRIBER_URL: 'https://youxuan1104.wroy.workers.dev/?key=ttvv00'
 };
 
 // 主要处理函数
