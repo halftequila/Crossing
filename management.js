@@ -164,7 +164,7 @@ function generateNodeManager() {
     `;
 }
 
-// ��成集合管理部分
+// 生成集合管理部分
 function generateCollectionManager(CONFIG) {
     return `
         <div class="bg-white rounded-lg shadow-lg p-6">
@@ -208,109 +208,26 @@ function generateScripts(env, CONFIG) {
                 SUB_WORKER_URL: '${env.SUB_WORKER_URL || CONFIG.SUB_WORKER_URL}',
                 TEMPLATE_URL: '${env.DEFAULT_TEMPLATE_URL || CONFIG.DEFAULT_TEMPLATE_URL}',
                 SUBSCRIBER_URL: '${env.SUBSCRIBER_URL || CONFIG.SUBSCRIBER_URL}',
-                QUICK_SUB_URL: '${env.QUICK_SUB_URL || CONFIG.QUICK_SUB_URL}',
-                AUTH: getAuth()  // 从localStorage获取认证信息
+                QUICK_SUB_URL: '${env.QUICK_SUB_URL || CONFIG.QUICK_SUB_URL}'
             };
 
-            // 修改认证检查逻辑
-            async function checkAuth() {
-                const auth = getAuth();
-                if (!auth) {
-                    showLoginDialog();
-                    return false;
-                }
-
-                try {
-                    const response = await fetch('/api/nodes', {
-                        headers: { 'Authorization': 'Basic ' + auth }
-                    });
-
-                    if (!response.ok) {
-                        if (response.status === 401) {
-                            clearAuth();
-                            showLoginDialog();
-                        }
-                        return false;
-                    }
-                    return true;
-                } catch (e) {
-                    console.error('Auth check failed:', e);
-                    return false;
-                }
-            }
-
-            // 修改登录函数
-            async function login() {
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                if (!username || !password) {
-                    alert('请输入用户名和密码');
-                    return;
-                }
-
-                const auth = btoa(username + ':' + password);
-                
-                try {
-                    const response = await fetch('/api/nodes', {
-                        headers: { 'Authorization': 'Basic ' + auth }
-                    });
-                    
-                    if (response.ok) {
-                        // 登录成功后保存认证信息
-                        localStorage.setItem('auth', auth);
-                        sessionStorage.setItem('auth', auth);
-                        CONFIG.AUTH = auth;
-                        
-                        // 关闭登录对话框
-                        document.querySelector('.fixed').remove();
-                        
-                        // 重新加载数据
-                        await Promise.all([loadNodes(), loadCollections()]);
-                    } else {
-                        alert('用户名或密码错误');
-                    }
-                } catch (e) {
-                    alert('登录失败');
-                }
-            }
-
-            // 修改 fetchWithAuth 函数
+            // 简化的 fetchWithAuth 函数
             async function fetchWithAuth(url, options = {}) {
-                const auth = getAuth();
-                if (!auth) {
-                    showLoginDialog();
-                    throw new Error('No auth token');
-                }
-
-                const response = await fetch(url, {
-                    ...options,
-                    headers: {
-                        ...options.headers,
-                        'Authorization': 'Basic ' + auth
-                    }
-                });
-
+                const response = await fetch(url, options);
                 if (response.status === 401) {
-                    clearAuth();
-                    showLoginDialog();
+                    // 让浏览器处理认证
+                    location.reload();
                     throw new Error('Unauthorized');
                 }
-
                 return response;
             }
 
             // 初始化函数
             async function init() {
-                if (await checkAuth()) {
-                    try {
-                        await Promise.all([loadNodes(), loadCollections()]);
-                    } catch (e) {
-                        console.error('Failed to load data:', e);
-                        if (e.message === 'Unauthorized') {
-                            showLoginDialog();
-                        }
-                    }
+                try {
+                    await Promise.all([loadNodes(), loadCollections()]);
+                } catch (e) {
+                    console.error('Failed to load data:', e);
                 }
             }
 

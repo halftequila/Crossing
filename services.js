@@ -554,6 +554,21 @@ export class ShareService extends BaseService {
     }
 }
 
+// 自定义错误类
+export class ValidationError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'ValidationError';
+    }
+}
+
+export class AuthError extends Error {
+    constructor(message = 'Unauthorized') {
+        super(message);
+        this.name = 'AuthError';
+    }
+}
+
 // 认证服务
 export class AuthService {
     constructor(env, config) {
@@ -561,12 +576,41 @@ export class AuthService {
         this.config = config;
     }
 
+    async handleRequest(request) {
+        if (request.method === 'OPTIONS') {
+            return new Response(null, {
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Access-Control-Max-Age': '86400'
+                }
+            });
+        }
+
+        const auth = request.headers.get('Authorization');
+        if (!this.checkAuth(auth)) {
+            return new Response(JSON.stringify({
+                error: 'Unauthorized',
+                code: 'AUTH_ERROR'
+            }), {
+                status: 401,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'WWW-Authenticate': 'Basic realm="Admin Access"'
+                }
+            });
+        }
+
+        return null;
+    }
+
     checkAuth(auth) {
         if (!auth) return false;
         
         try {
             const [username, password] = atob(auth.split(' ')[1]).split(':');
-            // 只使用 DEFAULT_USERNAME/PASSWORD
             const validUsername = this.env.DEFAULT_USERNAME || this.config.DEFAULT_USERNAME || 'admin';
             const validPassword = this.env.DEFAULT_PASSWORD || this.config.DEFAULT_PASSWORD || 'admin';
             
@@ -575,5 +619,50 @@ export class AuthService {
             console.error('Auth check failed:', e);
             return false;
         }
+    }
+}
+
+// 错误处理器
+export class ErrorHandler {
+    static handle(error, request) {
+        console.error('Error:', error);
+
+        if (error instanceof ValidationError) {
+            return new Response(JSON.stringify({
+                error: error.message,
+                code: 'VALIDATION_ERROR'
+            }), {
+                status: 400,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            });
+        }
+
+        if (error instanceof AuthError) {
+            return new Response(JSON.stringify({
+                error: error.message,
+                code: 'AUTH_ERROR'
+            }), {
+                status: 401,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                    // 移除 WWW-Authenticate 头，防止触发浏览器基本认证
+                }
+            });
+        }
+
+        return new Response(JSON.stringify({
+            error: 'Internal Server Error',
+            code: 'INTERNAL_ERROR'
+        }), {
+            status: 500,
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            }
+        });
     }
 } 
