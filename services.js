@@ -447,7 +447,7 @@ export class ShareService extends BaseService {
 
         const nodes = await this.getCollectionNodes(collection);
         
-        // 检查是否���置了外部订阅转换器
+        // 检查是否置了外部订阅转换器
         const externalConverter = this.env.SUB_WORKER_URL || this.config.SUB_WORKER_URL;
         const useInternal = url.searchParams.get('internal') === '1';
 
@@ -555,22 +555,24 @@ export class ShareService extends BaseService {
 }
 
 // 认证服务
-export class AuthService extends BaseService {
-    checkAuth(authHeader) {
+export class AuthService {
+    constructor(env, config) {
+        this.env = env;
+        this.config = config;
+    }
+
+    checkAuth(auth) {
+        if (!auth) return false;
+        
         try {
-            const [scheme, encoded] = authHeader.split(' ');
-            if (!encoded || scheme !== 'Basic') {
-                return false;
-            }
-            
-            const decoded = atob(encoded);
-            const [username, password] = decoded.split(':');
-            
-            const validUsername = this.env.ADMIN_USERNAME || this.config.DEFAULT_USERNAME;
-            const validPassword = this.env.ADMIN_PASSWORD || this.config.DEFAULT_PASSWORD;
+            const [username, password] = atob(auth.split(' ')[1]).split(':');
+            // 只使用 DEFAULT_USERNAME/PASSWORD
+            const validUsername = this.env.DEFAULT_USERNAME || this.config.DEFAULT_USERNAME || 'admin';
+            const validPassword = this.env.DEFAULT_PASSWORD || this.config.DEFAULT_PASSWORD || 'admin';
             
             return username === validUsername && password === validPassword;
         } catch (e) {
+            console.error('Auth check failed:', e);
             return false;
         }
     }
