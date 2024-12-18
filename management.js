@@ -61,7 +61,7 @@ function generateHeader(CONFIG) {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
-                            用户登录
+                            ���户登录
                         </button>
                         <button onclick="openSubscriber()"
                             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -161,8 +161,6 @@ function generateScripts(env, CONFIG) {
                 TEMPLATE_URL: '${env.DEFAULT_TEMPLATE_URL || CONFIG.DEFAULT_TEMPLATE_URL}',
                 SUBSCRIBER_URL: '${env.SUBSCRIBER_URL || CONFIG.SUBSCRIBER_URL}',
                 QUICK_SUB_URL: '${env.QUICK_SUB_URL || CONFIG.QUICK_SUB_URL}',
-                DEFAULT_USERNAME: '${env.DEFAULT_USERNAME || CONFIG.DEFAULT_USERNAME}',  // 添加用户名配置
-                DEFAULT_PASSWORD: '${env.DEFAULT_PASSWORD || CONFIG.DEFAULT_PASSWORD}',  // 添加密码配置
                 AUTH: getAuth()  // 从localStorage获取认证信息
             };
 
@@ -207,7 +205,7 @@ function generateScripts(env, CONFIG) {
                 }
             }
 
-            // 修改登录函数，使用环境变量中的用户名和密码
+            // 登录成功后直接使用保存的认证信息
             async function login() {
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
@@ -217,15 +215,24 @@ function generateScripts(env, CONFIG) {
                     return;
                 }
 
-                // 验证用户名和密码是否匹配环境变量设置
-                if (username === CONFIG.DEFAULT_USERNAME && password === CONFIG.DEFAULT_PASSWORD) {
-                    const auth = saveAuth(username, password);
-                    CONFIG.AUTH = auth;
-                    document.querySelector('.fixed').remove();
-                    await Promise.all([loadNodes(), loadCollections()]);
-                } else {
+                const auth = saveAuth(username, password);
+                CONFIG.AUTH = auth;
+
+                try {
+                    const response = await fetch('/api/nodes', {
+                        headers: { 'Authorization': 'Basic ' + auth }
+                    });
+                    
+                    if (response.ok) {
+                        document.querySelector('.fixed').remove();
+                        await Promise.all([loadNodes(), loadCollections()]);
+                    } else {
+                        clearAuth();
+                        alert('用户名或密码错误');
+                    }
+                } catch (e) {
                     clearAuth();
-                    alert('用户名或密码错误');
+                    alert('登录失败');
                 }
             }
 
