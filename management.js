@@ -161,6 +161,8 @@ function generateScripts(env, CONFIG) {
                 TEMPLATE_URL: '${env.DEFAULT_TEMPLATE_URL || CONFIG.DEFAULT_TEMPLATE_URL}',
                 SUBSCRIBER_URL: '${env.SUBSCRIBER_URL || CONFIG.SUBSCRIBER_URL}',
                 QUICK_SUB_URL: '${env.QUICK_SUB_URL || CONFIG.QUICK_SUB_URL}',
+                DEFAULT_USERNAME: '${env.DEFAULT_USERNAME || CONFIG.DEFAULT_USERNAME}',  // 添加用户名配置
+                DEFAULT_PASSWORD: '${env.DEFAULT_PASSWORD || CONFIG.DEFAULT_PASSWORD}',  // 添加密码配置
                 AUTH: getAuth()  // 从localStorage获取认证信息
             };
 
@@ -205,7 +207,7 @@ function generateScripts(env, CONFIG) {
                 }
             }
 
-            // 登录成功后直接使用保存的认证信息
+            // 修改登录函数，使用环境变量中的用户名和密码
             async function login() {
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
@@ -215,24 +217,15 @@ function generateScripts(env, CONFIG) {
                     return;
                 }
 
-                const auth = saveAuth(username, password);
-                CONFIG.AUTH = auth;
-
-                try {
-                    const response = await fetch('/api/nodes', {
-                        headers: { 'Authorization': 'Basic ' + auth }
-                    });
-                    
-                    if (response.ok) {
-                        document.querySelector('.fixed').remove();
-                        await Promise.all([loadNodes(), loadCollections()]);
-                    } else {
-                        clearAuth();
-                        alert('用户名或密码错误');
-                    }
-                } catch (e) {
+                // 验证用户名和密码是否匹配环境变量设置
+                if (username === CONFIG.DEFAULT_USERNAME && password === CONFIG.DEFAULT_PASSWORD) {
+                    const auth = saveAuth(username, password);
+                    CONFIG.AUTH = auth;
+                    document.querySelector('.fixed').remove();
+                    await Promise.all([loadNodes(), loadCollections()]);
+                } else {
                     clearAuth();
-                    alert('登录失败');
+                    alert('用户名或密码错误');
                 }
             }
 
