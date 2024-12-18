@@ -27,21 +27,69 @@ function generateHead() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://unpkg.com/tailwindcss@2/dist/tailwind.min.css" rel="stylesheet">
         <script>
-            // 保存认证信息
+            // 保存认证信息到 localStorage 和 sessionStorage
             function saveAuth(username, password) {
                 const auth = btoa(username + ':' + password);
-                localStorage.setItem('auth', auth);
+                try {
+                    localStorage.setItem('auth', auth);
+                } catch (e) {
+                    console.warn('localStorage not available');
+                }
+                sessionStorage.setItem('auth', auth);
                 return auth;
             }
 
-            // 获取认证信息
+            // 获取认证信息，优先从 sessionStorage 获取
             function getAuth() {
-                return localStorage.getItem('auth');
+                return sessionStorage.getItem('auth') || localStorage.getItem('auth');
             }
 
-            // 清除认证信息
+            // 清除所有认证信息
             function clearAuth() {
-                localStorage.removeItem('auth');
+                try {
+                    localStorage.removeItem('auth');
+                } catch (e) {
+                    console.warn('localStorage not available');
+                }
+                sessionStorage.removeItem('auth');
+            }
+
+            // 显示登录对话框
+            function showLoginDialog() {
+                const dialog = document.createElement('div');
+                dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                dialog.innerHTML = \`
+                    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                        <h2 class="text-xl font-bold mb-4">管理员登录</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">用户名</label>
+                                <input type="text" id="username" 
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">密码</label>
+                                <input type="password" id="password" 
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                            </div>
+                            <button onclick="login()"
+                                class="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                登录
+                            </button>
+                        </div>
+                    </div>
+                \`;
+                document.body.appendChild(dialog);
+
+                // 添加回车键登录支持
+                const inputs = dialog.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            login();
+                        }
+                    });
+                });
             }
         </script>
     `;
@@ -61,7 +109,7 @@ function generateHeader(CONFIG) {
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
-                            ���户登录
+                            用户登录
                         </button>
                         <button onclick="openSubscriber()"
                             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -116,7 +164,7 @@ function generateNodeManager() {
     `;
 }
 
-// 生成集合管理部分
+// ��成集合管理部分
 function generateCollectionManager(CONFIG) {
     return `
         <div class="bg-white rounded-lg shadow-lg p-6">
@@ -164,19 +212,24 @@ function generateScripts(env, CONFIG) {
                 AUTH: getAuth()  // 从localStorage获取认证信息
             };
 
-            // 简化认证检查，只在初始化时检查一次
+            // 修改认证检查逻辑
             async function checkAuth() {
-                if (!CONFIG.AUTH) {
+                const auth = getAuth();
+                if (!auth) {
                     showLoginDialog();
                     return false;
                 }
+
                 try {
                     const response = await fetch('/api/nodes', {
-                        headers: { 'Authorization': 'Basic ' + CONFIG.AUTH }
+                        headers: { 'Authorization': 'Basic ' + auth }
                     });
-                    if (response.status === 401) {
-                        clearAuth();
-                        showLoginDialog();
+
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            clearAuth();
+                            showLoginDialog();
+                        }
                         return false;
                     }
                     return true;
@@ -186,26 +239,7 @@ function generateScripts(env, CONFIG) {
                 }
             }
 
-            // 修改 fetchWithAuth，不再每次检查认证
-            async function fetchWithAuth(url, options = {}) {
-                return fetch(url, {
-                    ...options,
-                    headers: {
-                        ...options.headers,
-                        'Authorization': 'Basic ' + CONFIG.AUTH
-                    }
-                });
-            }
-
-            // 初始化时检查认证
-            async function init() {
-                if (await checkAuth()) {
-                    loadNodes();
-                    loadCollections();
-                }
-            }
-
-            // 登录成功后直接使用保存的认证信息
+            // 修改登录函数
             async function login() {
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
@@ -215,24 +249,68 @@ function generateScripts(env, CONFIG) {
                     return;
                 }
 
-                const auth = saveAuth(username, password);
-                CONFIG.AUTH = auth;
-
+                const auth = btoa(username + ':' + password);
+                
                 try {
                     const response = await fetch('/api/nodes', {
                         headers: { 'Authorization': 'Basic ' + auth }
                     });
                     
                     if (response.ok) {
+                        // 登录成功后保存认证信息
+                        localStorage.setItem('auth', auth);
+                        sessionStorage.setItem('auth', auth);
+                        CONFIG.AUTH = auth;
+                        
+                        // 关闭登录对话框
                         document.querySelector('.fixed').remove();
+                        
+                        // 重新加载数据
                         await Promise.all([loadNodes(), loadCollections()]);
                     } else {
-                        clearAuth();
                         alert('用户名或密码错误');
                     }
                 } catch (e) {
-                    clearAuth();
                     alert('登录失败');
+                }
+            }
+
+            // 修改 fetchWithAuth 函数
+            async function fetchWithAuth(url, options = {}) {
+                const auth = getAuth();
+                if (!auth) {
+                    showLoginDialog();
+                    throw new Error('No auth token');
+                }
+
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        ...options.headers,
+                        'Authorization': 'Basic ' + auth
+                    }
+                });
+
+                if (response.status === 401) {
+                    clearAuth();
+                    showLoginDialog();
+                    throw new Error('Unauthorized');
+                }
+
+                return response;
+            }
+
+            // 初始化函数
+            async function init() {
+                if (await checkAuth()) {
+                    try {
+                        await Promise.all([loadNodes(), loadCollections()]);
+                    } catch (e) {
+                        console.error('Failed to load data:', e);
+                        if (e.message === 'Unauthorized') {
+                            showLoginDialog();
+                        }
+                    }
                 }
             }
 
