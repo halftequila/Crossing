@@ -327,6 +327,7 @@ function convertVmess(node) {
 }
 
 function convertVless(node) {
+    console.log('Converting VLESS to Clash:', node);
     const config = {
         name: node.name,
         type: 'vless',
@@ -366,6 +367,7 @@ function convertVless(node) {
         };
     }
 
+    console.log('Converted Clash config:', config);
     return config;
 }
 

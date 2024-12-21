@@ -355,7 +355,7 @@ function convertNodeToSingbox(node) {
 
         case 'vless':
             const tlsEnabled = node.settings.security === 'tls' || node.settings.tls === 'tls';
-            return {
+            const config = {
                 type: 'vless',
                 tag,
                 server: node.server,
@@ -389,6 +389,7 @@ function convertNodeToSingbox(node) {
                     headers: node.settings.host ? { Host: node.settings.host } : undefined
                 } : undefined
             };
+            return config;
 
         case 'trojan':
             return {

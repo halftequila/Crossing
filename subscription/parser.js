@@ -58,66 +58,54 @@ export default class Parser {
      */
     static async parse(url, env) {
         try {
-            // 检查是否为内部URL格式
             if (url.startsWith('http://inner.nodes.secret/id-')) {
-                const kvId = url.replace('http://inner.nodes.secret/id-', '');
-                
-                // 检查 KV 存储是否可用
-                if (!env?.NODE_STORE) {
-                    throw new Error('KV store not available');
-                }
-                
-                // 先获取集合信息
-                const collectionsData = await env.NODE_STORE.get(CONFIG.COLLECTIONS_KEY);
-                if (!collectionsData) {
-                    throw new Error('Collections not found');
-                }
-                
-                const collections = JSON.parse(collectionsData);
-                const collection = collections.find(c => c.id === kvId);
-                if (!collection) {
-                    throw new Error('Collection not found');
+                const collectionId = url.replace('http://inner.nodes.secret/id-', '');
+                const collections = await env.NODE_STORE.get(CONFIG.COLLECTIONS_KEY);
+
+                if (!collections) {
+                    throw new Error('No collections found');
                 }
 
-                // 获取所有节点信息
+                const collectionsData = JSON.parse(collections);
+                const collection = collectionsData.find(c => c.id === collectionId);
+
                 const nodesData = await env.NODE_STORE.get(CONFIG.KV_KEY);
                 if (!nodesData) {
-                    throw new Error('Nodes not found');
+                    throw new Error('No nodes found');
                 }
 
-                // 获取集合中的节点
-                const allNodes = JSON.parse(nodesData);
-                const collectionNodes = allNodes.filter(node => collection.nodeIds.includes(node.id));
+                const nodes = JSON.parse(nodesData);
+                const collectionNodes = nodes.filter(node => 
+                    collection.nodeIds.includes(node.id)
+                );
 
-                let nodes = [];
-                // 处理每个节点
+                let processedNodes = [];
                 for (const node of collectionNodes) {
                     if (node.url.startsWith('http')) {
-                        // 如果是订阅链接，解析订阅内容
-                        const subNodes = await this.parse(node.url, env);
-                        nodes = nodes.concat(subNodes);
+                        try {
+                            const response = await fetch(node.url);
+                            if (!response.ok) continue;
+                            const content = await response.text();
+                            const subNodes = await this.parseContent(content);
+                            processedNodes = processedNodes.concat(subNodes);
+                        } catch (error) {
+                            console.error('Error processing subscription:', error);
+                        }
                     } else {
-                        // 如果是节点配置，直接解析
-                        const parsedNode = this.parseLine(node.url.trim());
+                        const parsedNode = this.parseLine(node.url);
                         if (parsedNode) {
-                            nodes.push(parsedNode);
+                            processedNodes.push(parsedNode);
                         }
                     }
                 }
-                
-                return nodes;
+
+                return processedNodes;
             }
 
-            // 处理普通URL
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const content = await response.text();
-            return this.parseContent(content, env);
+            throw new Error('Invalid URL format');
         } catch (error) {
-            console.error('Parse error:', error);
-            throw error;
+            console.error('Parser error:', error);
+            return [];
         }
     }
 
@@ -228,6 +216,13 @@ export default class Parser {
         if (!line) return null;
 
         try {
+            // 添加解析日志
+            console.log('Parsing node:', {
+                length: line.length,
+                protocol: line.split('://')[0],
+                sample: line.slice(0, 50) + '...'
+            });
+
             // 解析不同类型的节点
             if (line.startsWith('vmess://')) {
                 return this.parseVmess(line);
@@ -246,8 +241,12 @@ export default class Parser {
             } else if (line.startsWith('tuic://')) {
                 return this.parseTuic(line);
             }
+
+            // 记录未知协议
+            console.log('Unknown protocol:', line.split('://')[0]);
             return null;
         } catch (error) {
+            console.error('Parse line error:', error);
             return null;
         }
     }
@@ -306,7 +305,16 @@ export default class Parser {
         try {
             const url = new URL(line);
             const params = new URLSearchParams(url.search);
-            return {
+            
+            // 添加解析日志
+            console.log('Parsing VLESS node:', {
+                server: url.hostname,
+                port: url.port,
+                uuid: url.username,
+                params: Object.fromEntries(params.entries())
+            });
+
+            const node = {
                 type: 'vless',
                 name: decodeNodeName(url.hash.slice(1)),
                 server: url.hostname,
@@ -327,6 +335,10 @@ export default class Parser {
                     spx: params.get('spx') || ''
                 }
             };
+
+            // 添加解析结果日志
+            console.log('Parsed VLESS node:', node);
+            return node;
         } catch (error) {
             console.error('Parse VLESS error:', error);
             return null;

@@ -1,23 +1,22 @@
 import Parser from './parser.js';
+import { CONFIG } from '../config.js';
 
 /**
  * 处理基础转换请求
  * @param {Request} request
  */
 export async function handleConvertRequest(request, env) {
+    let path;
     try {
-        // 从路径中获取集合ID
-        const path = new URL(request.url).pathname;
+        path = new URL(request.url).pathname;
         const collectionId = path.split('/').slice(-2)[0];
         
-        // 直接通过Parser从KV读取节点数据
         const nodes = await Parser.parse(`http://inner.nodes.secret/id-${collectionId}`, env);
 
         if (!nodes || nodes.length === 0) {
             return new Response('No valid nodes found', { status: 400 });
         }
 
-        // 转换节点为标准格式
         const convertedNodes = nodes.map(node => {
             return convertToLink(node);
         }).filter(Boolean);
@@ -31,10 +30,13 @@ export async function handleConvertRequest(request, env) {
             }
         });
     } catch (error) {
-        console.error('Convert request error:', error);
+        console.error('Convert error:', error.message);
         return new Response(`Error: ${error.message}`, { 
             status: 500,
-            headers: { 'Content-Type': 'text/plain' }
+            headers: { 
+                'Content-Type': 'text/plain',
+                'Access-Control-Allow-Origin': '*'
+            }
         });
     }
 }
