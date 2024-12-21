@@ -176,7 +176,7 @@ function generateSecretPage(env, userData) {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link href="https://unpkg.com/tailwindcss@2/dist/tailwind.min.css" rel="stylesheet">
                 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-                <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
             </head>
             <body class="bg-gray-100 min-h-screen" data-page="secret">
                 <div class="container mx-auto px-4 py-8">
@@ -275,15 +275,22 @@ function generateSecretPage(env, userData) {
 
                 <!-- 添加二维码对话框 -->
                 <div id="qrcodeDialog" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-                    <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-800">订阅二维码</h3>
-                            <button onclick="closeQRCode()" class="text-gray-500 hover:text-gray-700">
-                                <i class="fas fa-times"></i>
+                    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold text-gray-800">
+                                <i class="fas fa-qrcode text-blue-500 mr-2"></i>
+                                订阅二维码
+                            </h3>
+                            <button onclick="closeQRCode()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times text-xl"></i>
                             </button>
                         </div>
-                        <div id="qrcode" class="flex justify-center"></div>
-                        <p id="qrcodeUrl" class="mt-4 text-sm text-gray-600 break-all"></p>
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <div id="qrcode" class="flex justify-center items-center min-h-[256px]"></div>
+                        </div>
+                        <div class="mt-6 text-center text-sm text-gray-500">
+                            <p>扫描二维码获取订阅</p>
+                        </div>
                     </div>
                 </div>
 
@@ -337,7 +344,7 @@ function generateSecretPage(env, userData) {
                         const templateParam = (type !== 'base' && CONFIG.TEMPLATE_URL) ? 
                             '&template=' + encodeURIComponent(CONFIG.TEMPLATE_URL) : '';
                         
-                        // 根据类型获取订阅路径
+                        // 根据型获取订阅路径
                         const typePath = type === 'base' ? CONFIG.SUBSCRIPTION.BASE_PATH :
                                        type === 'singbox' ? CONFIG.SUBSCRIPTION.SINGBOX_PATH :
                                        type === 'clash' ? CONFIG.SUBSCRIPTION.CLASH_PATH : '';
@@ -384,36 +391,37 @@ function generateSecretPage(env, userData) {
                         const url = generateSubscriptionUrl(id, type);
                         const dialog = document.getElementById('qrcodeDialog');
                         const qrcodeDiv = document.getElementById('qrcode');
-                        const urlText = document.getElementById('qrcodeUrl');
                         
                         // 清除旧的二维码
                         qrcodeDiv.innerHTML = '';
                         
+                        // 显示加载动画
+                        qrcodeDiv.innerHTML = '<div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>';
+                        
                         // 生成新的二维码
-                        QRCode.toCanvas(qrcodeDiv, url, {
-                            width: 256,
-                            margin: 2,
-                            color: {
-                                dark: '#000000',
-                                light: '#ffffff'
-                            }
-                        }, function(error) {
-                            if (error) console.error(error);
-                        });
-
-                        // 显示链接文本
-                        urlText.textContent = url;
+                        setTimeout(function() {
+                            qrcodeDiv.innerHTML = '';
+                            new QRCode(qrcodeDiv, {
+                                text: url,
+                                width: 256,
+                                height: 256,
+                                colorDark: "#000000",
+                                colorLight: "#ffffff",
+                                correctLevel: QRCode.CorrectLevel.H
+                            });
+                        }, 300);
                         
                         // 显示对话框
                         dialog.classList.remove('hidden');
                     }
 
-                    // 关闭二维码对话框
+                    // 修改关闭函数
                     function closeQRCode() {
-                        document.getElementById('qrcodeDialog').classList.add('hidden');
+                        const dialog = document.getElementById('qrcodeDialog');
+                        dialog.classList.add('hidden');
                     }
 
-                    // 点击对话框背景关闭
+                    // 点击背景关闭
                     document.getElementById('qrcodeDialog').addEventListener('click', function(e) {
                         if (e.target === this) {
                             closeQRCode();
