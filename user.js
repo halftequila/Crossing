@@ -176,6 +176,7 @@ function generateSecretPage(env, userData) {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link href="https://unpkg.com/tailwindcss@2/dist/tailwind.min.css" rel="stylesheet">
                 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+                <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
             </head>
             <body class="bg-gray-100 min-h-screen" data-page="secret">
                 <div class="container mx-auto px-4 py-8">
@@ -210,10 +211,16 @@ function generateSecretPage(env, userData) {
                                 </h2>
                             </div>
                             <p class="text-gray-600 mb-4">适用于大多数代理客户端的通用订阅格式</p>
-                            <button onclick="universalSubscription('${userData.collectionId}')"
-                                class="w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-                                <i class="fas fa-copy mr-2"></i>复制链接
-                            </button>
+                            <div class="flex space-x-2">
+                                <button onclick="universalSubscription('${userData.collectionId}')"
+                                    class="flex-1 flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                    <i class="fas fa-copy mr-2"></i>复制链接
+                                </button>
+                                <button onclick="showQRCode('base', '${userData.collectionId}')"
+                                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                    <i class="fas fa-qrcode"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- SingBox 订阅 -->
@@ -224,10 +231,16 @@ function generateSecretPage(env, userData) {
                                 </h2>
                             </div>
                             <p class="text-gray-600 mb-4">专用于 SingBox 客户端的配置订阅</p>
-                            <button onclick="singboxSubscription('${userData.collectionId}')"
-                                class="w-full flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
-                                <i class="fas fa-copy mr-2"></i>复制链接
-                            </button>
+                            <div class="flex space-x-2">
+                                <button onclick="singboxSubscription('${userData.collectionId}')"
+                                    class="flex-1 flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                                    <i class="fas fa-copy mr-2"></i>复制链接
+                                </button>
+                                <button onclick="showQRCode('singbox', '${userData.collectionId}')"
+                                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                                    <i class="fas fa-qrcode"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Clash 订阅 -->
@@ -238,10 +251,16 @@ function generateSecretPage(env, userData) {
                                 </h2>
                             </div>
                             <p class="text-gray-600 mb-4">专用于 Clash 客户端的配置订阅</p>
-                            <button onclick="clashSubscription('${userData.collectionId}')"
-                                class="w-full flex items-center justify-center px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors">
-                                <i class="fas fa-copy mr-2"></i>复制链接
-                            </button>
+                            <div class="flex space-x-2">
+                                <button onclick="clashSubscription('${userData.collectionId}')"
+                                    class="flex-1 flex items-center justify-center px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors">
+                                    <i class="fas fa-copy mr-2"></i>复制链接
+                                </button>
+                                <button onclick="showQRCode('clash', '${userData.collectionId}')"
+                                    class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors">
+                                    <i class="fas fa-qrcode"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -251,6 +270,20 @@ function generateSecretPage(env, userData) {
                             <i class="fas fa-check-circle mr-2"></i>
                             <span id="toastMessage"></span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 添加二维码对话框 -->
+                <div id="qrcodeDialog" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">订阅二维码</h3>
+                            <button onclick="closeQRCode()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="qrcode" class="flex justify-center"></div>
+                        <p id="qrcodeUrl" class="mt-4 text-sm text-gray-600 break-all"></p>
                     </div>
                 </div>
 
@@ -345,6 +378,47 @@ function generateSecretPage(env, userData) {
                             window.location.href = '/user';
                         }
                     };
+
+                    // 显示二维码对话框
+                    function showQRCode(type, id) {
+                        const url = generateSubscriptionUrl(id, type);
+                        const dialog = document.getElementById('qrcodeDialog');
+                        const qrcodeDiv = document.getElementById('qrcode');
+                        const urlText = document.getElementById('qrcodeUrl');
+                        
+                        // 清除旧的二维码
+                        qrcodeDiv.innerHTML = '';
+                        
+                        // 生成新的二维码
+                        QRCode.toCanvas(qrcodeDiv, url, {
+                            width: 256,
+                            margin: 2,
+                            color: {
+                                dark: '#000000',
+                                light: '#ffffff'
+                            }
+                        }, function(error) {
+                            if (error) console.error(error);
+                        });
+
+                        // 显示链接文本
+                        urlText.textContent = url;
+                        
+                        // 显示对话框
+                        dialog.classList.remove('hidden');
+                    }
+
+                    // 关闭二维码对话框
+                    function closeQRCode() {
+                        document.getElementById('qrcodeDialog').classList.add('hidden');
+                    }
+
+                    // 点击对话框背景关闭
+                    document.getElementById('qrcodeDialog').addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            closeQRCode();
+                        }
+                    });
                 </script>
             </body>
             </html>
