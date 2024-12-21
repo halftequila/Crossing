@@ -691,7 +691,7 @@ export class UserService extends BaseService {
                 success: false,
                 error: '用户名或密码错误'
             }), { 
-                status: 401,
+                status: 400,
                 headers: { 'Content-Type': 'application/json' }
             });
         } catch (error) {
