@@ -381,30 +381,20 @@ export class ShareService extends BaseService {
     }
 
     async handleRequest(request) {
-        const url = new URL(request.url);
-        const path = url.pathname;
-        
-        // 修改ID提取逻辑
-        const pathParts = path.split('/');
-        let id;
-        
-        // 处理带有订阅类型的路径 (如 /api/share/{id}/base)
-        if (this.isSubscriptionPath(path)) {
-            id = pathParts[pathParts.length - 2];  // 获取倒数第二个部分作为ID
-        } else {
-            id = pathParts[pathParts.length - 1];  // 获取最后一个部分作为ID
-        }
-
         try {
-            // 处理订阅请求
+            const url = new URL(request.url);
+            const path = url.pathname;
+            const pathParts = path.split('/');
+            
+            // 检查是否是订阅请求
             if (this.isSubscriptionPath(path)) {
+                const id = pathParts[pathParts.length - 2];  // 获取倒数部分作为ID
                 return this.handleSubscription(request, id);
+            } else {
+                const id = pathParts[pathParts.length - 1];  // 获取最后一个部分作为ID
+                return this.handleShare(id);
             }
-
-            // 处理普通分享请求
-            return this.handleShare(id);
         } catch (e) {
-            console.error('Share service error:', e);
             return new Response('Error processing request', { status: 500 });
         }
     }
@@ -413,13 +403,11 @@ export class ShareService extends BaseService {
         try {
             const collection = await this.getCollection(id);
             if (!collection) {
-                console.error('Collection not found:', id);
                 return new Response('Collection not found', { status: 404 });
             }
 
             const nodes = await this.getCollectionNodes(collection);
             if (!nodes || nodes.length === 0) {
-                console.error('No nodes found for collection:', id);
                 return new Response('No nodes found', { status: 404 });
             }
 
@@ -432,7 +420,6 @@ export class ShareService extends BaseService {
                 }
             });
         } catch (e) {
-            console.error('Error in handleShare:', e);
             return new Response('Internal Server Error', { status: 500 });
         }
     }
@@ -464,36 +451,34 @@ export class ShareService extends BaseService {
         const url = new URL(request.url);
         const path = url.pathname;
 
-        // 导入相应的处理函数
-        if (path.endsWith('/base')) {
-            const { handleConvertRequest } = await import('./subscription/base.js');
-            // 使用自定义头部传递节点数据
-            const headers = new Headers(request.headers);
-            headers.set('X-Node-Data', JSON.stringify(nodes));
-            const newRequest = new Request(request.url, {
-                ...request,
-                headers
-            });
-            return handleConvertRequest(newRequest, this.env);
-        } 
-        else if (path.endsWith('/singbox')) {
-            const { handleSingboxRequest } = await import('./subscription/singbox.js');
-            const newRequest = new Request(request.url, {
-                ...request,
-                nodeData: nodes
-            });
-            return handleSingboxRequest(newRequest, this.env);
-        } 
-        else if (path.endsWith('/clash')) {
-            const { handleClashRequest } = await import('./subscription/clash.js');
-            const newRequest = new Request(request.url, {
-                ...request,
-                nodeData: nodes
-            });
-            return handleClashRequest(newRequest, this.env);
-        }
+        // 创建一个新的 Request 对象但不通过 headers 传递点
+        const newRequest = new Request(request.url, {
+            ...request,
+            // 添加自定义属性来传递��点数据
+            nodeData: nodes
+        });
 
-        return new Response('Invalid subscription type', { status: 400 });
+        try {
+            if (path.endsWith('/base')) {
+                const { handleConvertRequest } = await import('./subscription/base.js');
+                return handleConvertRequest(newRequest, this.env);
+            } 
+            else if (path.endsWith('/singbox')) {
+                const { handleSingboxRequest } = await import('./subscription/singbox.js');
+                return handleSingboxRequest(newRequest, this.env);
+            } 
+            else if (path.endsWith('/clash')) {
+                const { handleClashRequest } = await import('./subscription/clash.js');
+                return handleClashRequest(newRequest, this.env);
+            }
+
+            return new Response('Invalid subscription type', { status: 400 });
+        } catch (error) {
+            return new Response(`Error: ${error.message}`, { 
+                status: 500,
+                headers: { 'Content-Type': 'text/plain' }
+            });
+        }
     }
 
     async handleExternalSubscription(request, nodes) {
@@ -518,33 +503,18 @@ export class ShareService extends BaseService {
         try {
             const collections = await this.collectionsService.getCollections();
             const collection = collections.find(c => c.id === id);
-            if (!collection) {
-                console.error('Collection not found in getCollection:', id);
-            }
             return collection;
         } catch (e) {
-            console.error('Error in getCollection:', e);
             return null;
         }
     }
 
     async getCollectionNodes(collection) {
         try {
-            if (!collection || !collection.nodeIds || !Array.isArray(collection.nodeIds)) {
-                console.error('Invalid collection:', collection);
-                return [];
-            }
-
             const nodes = await this.nodesService.getNodes();
             const collectionNodes = nodes.filter(node => collection.nodeIds.includes(node.id));
-            
-            if (collectionNodes.length === 0) {
-                console.error('No nodes found for collection:', collection.id);
-            }
-            
             return collectionNodes;
         } catch (e) {
-            console.error('Error in getCollectionNodes:', e);
             return [];
         }
     }
@@ -574,7 +544,7 @@ export class AuthService {
     constructor(env, config) {
         this.env = env;
         this.config = config;
-    }
+    } 
 
     async handleRequest(request) {
         if (request.method === 'OPTIONS') {
@@ -616,7 +586,6 @@ export class AuthService {
             
             return username === validUsername && password === validPassword;
         } catch (e) {
-            console.error('Auth check failed:', e);
             return false;
         }
     }
@@ -625,8 +594,6 @@ export class AuthService {
 // 错误处理器
 export class ErrorHandler {
     static handle(error, request) {
-        console.error('Error:', error);
-
         if (error instanceof ValidationError) {
             return new Response(JSON.stringify({
                 error: error.message,
@@ -649,7 +616,6 @@ export class ErrorHandler {
                 headers: {
                     'Content-Type': 'application/json',
                     'Access-Control-Allow-Origin': '*'
-                    // 移除 WWW-Authenticate 头，防止触发浏览器基本认证
                 }
             });
         }
@@ -665,4 +631,113 @@ export class ErrorHandler {
             }
         });
     }
-} 
+}
+
+// 用户服务
+export class UserService extends BaseService {
+    // 修改会话有效期为3小时
+    SESSION_TTL = 3 * 60 * 60 * 1000;  // 3小时 = 3 * 60分 * 60秒 * 1000毫秒
+
+    async handleLogin(request) {
+        try {
+            const { username, password } = await request.json();
+
+            // 获取浏览器特信息
+            const browserInfo = {
+                userAgent: request.headers.get('User-Agent'),
+                ip: request.headers.get('CF-Connecting-IP'),
+                country: request.headers.get('CF-IPCountry'),
+                platform: request.headers.get('Sec-CH-UA-Platform'),
+                mobile: request.headers.get('Sec-CH-UA-Mobile')
+            };
+
+            // 从 KV 获取用户令牌信息
+            const tokensData = await this.env.NODE_STORE.get(CONFIG.USER_TOKENS_KEY) || '[]';
+            const tokens = JSON.parse(tokensData);
+            
+            // 查找匹配的用户令牌
+            const userToken = tokens.find(t => 
+                t.username === username && 
+                t.password === password
+            );
+
+            if (userToken) {
+                // 创建会话
+                const sessionToken = this.generateUUID();
+                
+                // 保存会话信息，使用3小时过期时间
+                await this.env.NODE_STORE.put(
+                    CONFIG.KV_PREFIX.SESSION + sessionToken,
+                    JSON.stringify({
+                        username: userToken.username,
+                        collectionId: userToken.collectionId,
+                        browserInfo,
+                        expiresAt: Date.now() + this.SESSION_TTL  // 3小时后过期
+                    }),
+                    { expirationTtl: this.SESSION_TTL / 1000 }  // 转换为秒
+                );
+
+                return new Response(JSON.stringify({
+                    success: true,
+                    sessionToken,
+                    username: userToken.username,
+                    collectionId: userToken.collectionId
+                }), {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+
+            return new Response(JSON.stringify({
+                success: false,
+                error: '用户名或密码错误'
+            }), { 
+                status: 401,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (error) {
+            console.error('Login error:', error);
+            return new Response(JSON.stringify({
+                success: false,
+                error: '登录失败，请重试'
+            }), { 
+                status: 400,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    }
+
+    async verifySession(sessionToken, request) {
+        if (!sessionToken) return null;
+
+        try {
+            const data = await this.env.NODE_STORE.get(CONFIG.KV_PREFIX.SESSION + sessionToken);
+            if (data) {
+                const session = JSON.parse(data);
+                if (session.expiresAt > Date.now()) {
+                    // 验证浏览器特征
+                    const currentBrowser = {
+                        userAgent: request.headers.get('User-Agent'),
+                        platform: request.headers.get('Sec-CH-UA-Platform')
+                    };
+
+                    if (
+                        currentBrowser.userAgent === session.browserInfo.userAgent &&
+                        currentBrowser.platform === session.browserInfo.platform
+                    ) {
+                        return session;
+                    }
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('Session verification error:', error);
+            return null;
+        }
+    }
+
+    async deleteSession(sessionToken) {
+        if (sessionToken) {
+            await this.env.NODE_STORE.delete(CONFIG.KV_PREFIX.SESSION + sessionToken);
+        }
+    }
+}

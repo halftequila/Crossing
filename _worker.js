@@ -1,6 +1,6 @@
 // CFSUB.js
 import { CONFIG } from './config.js';
-import { NodesService, CollectionsService, ShareService, AuthService } from './services.js';
+import { NodesService, CollectionsService, ShareService, AuthService, UserService } from './services.js';
 import { generateManagementPage } from './management.js';
 import { isSubscriptionPath } from './utils.js';
 import { ErrorHandler } from './middleware.js';
@@ -21,12 +21,14 @@ function initializeServices(env) {
     const nodesService = new NodesService(env, CONFIG);
     const collectionsService = new CollectionsService(env, CONFIG);
     const shareService = new ShareService(env, CONFIG, nodesService, collectionsService);
+    const userService = new UserService(env, CONFIG);
     const authService = new AuthService(env, CONFIG);
 
     return {
         nodes: nodesService,
         collections: collectionsService,
         share: shareService,
+        user: userService,
         auth: authService
     };
 }
@@ -47,62 +49,33 @@ async function handleRequest(request, env, services) {
     }
 
     // 用户页面路由处理
-    if (path.startsWith('/user')) {
-        const collectionId = path.split('/')[2];
-        if (!collectionId) {
-            return generateUserPage(env);
-        }
-
-        // 检查集合是否存在
-        const collections = await services.collections.getCollections();
-        const collection = collections.find(c => c.id === collectionId);
-        if (!collection) {
-            return new Response('Collection not found', { status: 404 });
-        }
-
-        // 检查是否需要验证
-        const tokensData = await env.NODE_STORE.get(CONFIG.USER_TOKENS_KEY) || '[]';
-        const tokens = JSON.parse(tokensData);
-        const hasToken = tokens.some(t => t.collectionId === collectionId);
-
-        if (!hasToken) {
-            // 如果集合没有设置用户名密码，直接显示集合页面
-            return generateUserPage(env, collectionId);
-        }
-
-        // 检查用户凭证
-        const userAuth = request.headers.get('Authorization');
-        if (!userAuth) {
-            // 没有凭证，返回 401 触发浏览器的登录框
-            return new Response('Authentication required', {
-                status: 401,
-                headers: {
-                    'WWW-Authenticate': 'Basic realm="User Access"',
-                    'Content-Type': 'text/plain'
-                }
-            });
-        }
-
+    if (path.startsWith(CONFIG.API.USER.PAGE)) {
         try {
-            const [username, password] = atob(userAuth.split(' ')[1]).split(':');
-            const userToken = await services.collections.verifyUserAccess(username, password);
-            
-            if (userToken && userToken.collectionId === collectionId) {
-                // 凭证有效且匹配当前集合，显示集合页面
-                return generateUserPage(env, collectionId);
+            let auth = request.headers.get('Authorization');
+            const url = new URL(request.url);
+            const token = url.searchParams.get('token');
+            if (token) {
+                auth = `Bearer ${token}`;
             }
-        } catch (e) {
-            console.error('验证用户凭证失败:', e);
-        }
 
-        // 凭证无效或不匹配，返回 401 触发浏览器的登录框
-        return new Response('Invalid credentials', {
-            status: 401,
-            headers: {
-                'WWW-Authenticate': 'Basic realm="User Access"',
-                'Content-Type': 'text/plain'
+            if (auth?.startsWith('Bearer ')) {
+                const sessionToken = auth.split(' ')[1];
+                const session = await services.user.verifySession(sessionToken, request);
+                if (session) {
+                    // 返回带用户信息的页面
+                    return generateUserPage(env, 'secret', {
+                        username: session.username,
+                        collectionId: session.collectionId,
+                        request: request
+                    });
+                }
             }
-        });
+
+            // 没有有效认证时返回登录页
+            return generateUserPage(env);
+        } catch (error) {
+            return ErrorHandler.handle(error, request);
+        }
     }
 
     // 公开路径不需要认证
@@ -137,11 +110,9 @@ async function handleRequest(request, env, services) {
 function isPublicPath(path) {
     return path.startsWith(CONFIG.API.SHARE) || 
            isSubscriptionPath(path) || 
-           path.startsWith('/user') ||  // 用户页面路径
-           path === '/api/collections/verify' ||  // 用户验证接口
-           path.startsWith('/api/collections/token/') ||  // 用户令牌接口
-           path === '/api/collections' ||  // 允许获取集合列表
-           path === '/favicon.ico';  // 允许访问网站图标
+           path.startsWith('/user') ||  // 用户页面径
+           path.startsWith(CONFIG.API.USER.BASE) ||  // 所有用户API都是公开的
+           path === '/favicon.ico';
 }
 
 function handleCORS() {
@@ -156,19 +127,41 @@ function handleCORS() {
 }
 
 async function handleAPIRequest(request, path, services) {
-    // 节点API
+    
+    // 分享API - 公开访问
+    if (path.startsWith(CONFIG.API.SHARE)) {
+        return services.share.handleRequest(request);
+    }
+    
+    // 用户API - 公开访问
+    if (path.startsWith(CONFIG.API.USER.BASE)) {
+        if (path === CONFIG.API.USER.LOGIN) {
+            return services.user.handleLogin(request);
+        }
+        
+        // 处理登出请求
+        if (path === CONFIG.API.USER.LOGOUT) {
+            const urlObj = new URL(request.url);
+            const token = urlObj.searchParams.get('token');
+            if (token) {
+                await services.user.deleteSession(token);
+            }
+            return new Response(JSON.stringify({ success: true }), {
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        return services.user.handleRequest(request);
+    }
+    
+    // 节点API - 需要管理员权限
     if (path.startsWith(CONFIG.API.NODES)) {
         return services.nodes.handleRequest(request);
     }
     
-    // 集合API
+    // 集合API - 需要管理员权限
     if (path.startsWith(CONFIG.API.COLLECTIONS)) {
         return services.collections.handleRequest(request);
-    }
-    
-    // 分享API
-    if (path.startsWith(CONFIG.API.SHARE)) {
-        return services.share.handleRequest(request);
     }
 
     return new Response('Not Found', { status: 404 });

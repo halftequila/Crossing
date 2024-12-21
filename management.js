@@ -1,3 +1,5 @@
+import { CONFIG, getConfig } from './config.js';
+
 // 管理页面生成
 export function generateManagementPage(env, CONFIG) {
     const html = `
@@ -7,7 +9,7 @@ export function generateManagementPage(env, CONFIG) {
             ${generateHead()}
         </head>
         <body class="bg-gray-100 min-h-screen">
-            ${generateHeader(CONFIG)}
+            ${generateHeader(CONFIG, env)}
             ${generateMainContent(CONFIG)}
             ${generateScripts(env, CONFIG)}
         </body>
@@ -96,7 +98,7 @@ function generateHead() {
 }
 
 // 生成页面头部
-function generateHeader(CONFIG) {
+function generateHeader(CONFIG, env) {
     return `
         <header class="bg-white shadow">
             <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -203,19 +205,19 @@ function generateCollectionManager(CONFIG) {
 function generateScripts(env, CONFIG) {
     return `
         <script>
-            // 配置常量
+            // 配置常量，直接使用 getConfig 处理的值
             const CONFIG = {
-                SUB_WORKER_URL: '${env.SUB_WORKER_URL || CONFIG.SUB_WORKER_URL}',
-                TEMPLATE_URL: '${env.DEFAULT_TEMPLATE_URL || CONFIG.DEFAULT_TEMPLATE_URL}',
-                SUBSCRIBER_URL: '${env.SUBSCRIBER_URL || CONFIG.SUBSCRIBER_URL}',
-                QUICK_SUB_URL: '${env.QUICK_SUB_URL || CONFIG.QUICK_SUB_URL}'
+                SUB_WORKER_URL: '${getConfig('SUB_WORKER_URL', env)}',
+                TEMPLATE_URL: '${getConfig('DEFAULT_TEMPLATE_URL', env)}',
+                SUBSCRIBER_URL: '${getConfig('SUBSCRIBER_URL', env)}',
+                QUICK_SUB_URL: '${getConfig('QUICK_SUB_URL', env)}',
+                API: ${JSON.stringify(CONFIG.API)}
             };
 
             // 简化的 fetchWithAuth 函数
             async function fetchWithAuth(url, options = {}) {
                 const response = await fetch(url, options);
                 if (response.status === 401) {
-                    // 让浏览器处理认证
                     location.reload();
                     throw new Error('Unauthorized');
                 }
@@ -236,27 +238,7 @@ function generateScripts(env, CONFIG) {
 
             ${generateNodeScripts()}
             ${generateCollectionScripts()}
-            ${generateUtilityScripts()}
-
-            // 打开订阅器
-            function openSubscriber() {
-                const subscriberUrl = '${env.SUBSCRIBER_URL || CONFIG.SUBSCRIBER_URL}';
-                if (subscriberUrl) {
-                    window.open(subscriberUrl, '_blank');
-                } else {
-                    showToast('订阅器地址未配置');
-                }
-            }
-
-            // 打开快速订阅器
-            function openQuickSubscriber() {
-                const quickSubUrl = '${env.QUICK_SUB_URL || CONFIG.QUICK_SUB_URL}';
-                if (quickSubUrl) {
-                    window.open(quickSubUrl, '_blank');
-                } else {
-                    showToast('快速订阅器地址未配置');
-                }
-            }
+            ${generateUtilityScripts(env, CONFIG)}
         </script>
     `;
 }
@@ -799,18 +781,26 @@ function generateCollectionScripts() {
 }
 
 // 生成工具函数脚本
-function generateUtilityScripts() {
+function generateUtilityScripts(env, CONFIG) {
     return `
         function openUserLogin() {
-            window.open('/user', '_blank');
+            window.open('${CONFIG.API.USER.PAGE}', '_blank');
         }
 
         function openSubscriber() {
-            window.open(CONFIG.SUBSCRIBER_URL, '_blank');
+            if (CONFIG.SUBSCRIBER_URL) {
+                window.open(CONFIG.SUBSCRIBER_URL, '_blank');
+            } else {
+                showToast('订阅器地址未配置');
+            }
         }
 
         function openQuickSubscriber() {
-            window.open(CONFIG.QUICK_SUB_URL, '_blank');
+            if (CONFIG.QUICK_SUB_URL) {
+                window.open(CONFIG.QUICK_SUB_URL, '_blank');
+            } else {
+                showToast('快速订阅器地址未配置');
+            }
         }
 
         async function copyToClipboard(text, message) {

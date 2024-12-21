@@ -1,109 +1,158 @@
-import { CONFIG } from './config.js';
+import { CONFIG, getConfig } from './config.js';
 
-export function generateUserPage(env, collectionId) {
-    // 如果没有collectionId，显示登录页面
-    if (!collectionId) {
-        return generateLoginPage(env);
+export function generateUserPage(env, pageType = 'login', userData = null) {
+    switch (pageType) {
+        case 'login':
+            return generateLoginPage();
+        case 'secret':
+            return generateSecretPage(env, userData);
+        default:
+            return new Response('Not Found', { status: 404 });
     }
-
-    // 显示集合订阅页面
-    const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>订阅管理</title>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link href="https://unpkg.com/tailwindcss@2/dist/tailwind.min.css" rel="stylesheet">
-        </head>
-        <body class="bg-gray-100 min-h-screen">
-            <header class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    <h1 class="text-3xl font-bold text-gray-900">我的订阅</h1>
-                </div>
-            </header>
-
-            <main class="container mx-auto px-4 py-8">
-                <div id="collectionList" class="space-y-4">
-                    <!-- 集合信息将通过 JavaScript 动态加载 -->
-                </div>
-            </main>
-
-            ${generateScripts(env, collectionId)}
-        </body>
-        </html>
-    `;
-
-    return new Response(html, {
-        headers: { 'Content-Type': 'text/html;charset=utf-8' }
-    });
 }
 
-function generateLoginPage(env) {
+// 生成登录页面
+function generateLoginPage() {
     const html = `
         <!DOCTYPE html>
         <html>
         <head>
-            <title>订阅访问</title>
+            <title>用户登录</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link href="https://unpkg.com/tailwindcss@2/dist/tailwind.min.css" rel="stylesheet">
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
         </head>
-        <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-            <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-                <h1 class="text-2xl font-bold text-center mb-8">订阅访问</h1>
-                <form id="loginForm" class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">用户名</label>
-                        <input type="text" id="username" required
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        <body class="bg-gradient-to-br from-blue-500 to-purple-600 min-h-screen flex items-center justify-center" data-page="login">
+            <div class="max-w-md w-full mx-4">
+                <!-- 登录卡片 -->
+                <div class="bg-white rounded-lg shadow-2xl p-8 transform transition-all duration-300 hover:scale-105">
+                    <!-- 标题部分 -->
+                    <div class="text-center mb-8">
+                        <div class="inline-block p-4 rounded-full bg-blue-100 mb-4">
+                            <i class="fas fa-rocket text-blue-500 text-3xl"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold text-gray-800">订阅中心</h1>
+                        <p class="text-gray-600 mt-2">请登录以访问您的订阅</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">访问密码</label>
-                        <input type="password" id="password" required
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+
+                    <!-- 登录表单 -->
+                    <form id="loginForm" class="space-y-6">
+                        <!-- 用户名输入框 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                <i class="fas fa-user text-gray-400 mr-2"></i>用户名
+                            </label>
+                            <input type="text" id="username" name="username" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                placeholder="请输入用户名">
+                        </div>
+
+                        <!-- 密码输入框 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                <i class="fas fa-lock text-gray-400 mr-2"></i>密码
+                            </label>
+                            <div class="relative">
+                                <input type="password" id="password" name="password" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    placeholder="请输入密码">
+                                <button type="button" id="togglePassword" 
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 登录按钮 -->
+                        <button type="submit"
+                            class="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            <span>登录</span>
+                        </button>
+                    </form>
+
+                    <!-- 错误提示 -->
+                    <div id="errorMessage" class="mt-4 text-center text-red-500 hidden">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        <span></span>
                     </div>
-                    <button type="submit"
-                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        访问
-                    </button>
-                </form>
+                </div>
+            </div>
+
+            <!-- 加载动画 -->
+            <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+                <div class="bg-white rounded-lg p-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
+                </div>
             </div>
 
             <script>
-                // 保存用户凭证
-                function saveUserAuth(username, password) {
-                    const auth = btoa(username + ':' + password);
-                    localStorage.setItem('user_auth', auth);
-                    return auth;
+                // 显示/隐藏密码
+                document.getElementById('togglePassword').onclick = function() {
+                    const passwordInput = document.getElementById('password');
+                    const icon = this.querySelector('i');
+                    
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                };
+
+                // 显示错误信息
+                function showError(message) {
+                    const errorDiv = document.getElementById('errorMessage');
+                    errorDiv.querySelector('span').textContent = message;
+                    errorDiv.classList.remove('hidden');
+                    setTimeout(() => {
+                        errorDiv.classList.add('hidden');
+                    }, 3000);
                 }
 
+                // 显示/隐藏加载动画
+                function toggleLoading(show) {
+                    document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+                }
+
+                // 登录表单处理
                 document.getElementById('loginForm').addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    const username = document.getElementById('username').value;
-                    const password = document.getElementById('password').value;
+                    
+                    const username = document.getElementById('username').value.trim();
+                    const password = document.getElementById('password').value.trim();
+
+                    if (!username || !password) {
+                        showError('请输入用户名和密码');
+                        return;
+                    }
 
                     try {
-                        const response = await fetch('/api/collections/verify', {
+                        toggleLoading(true);
+                        const response = await fetch('/api/user/login', {
                             method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Basic ' + btoa(username + ':' + password)
+                            headers: {
+                                'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ username, password })
                         });
 
-                        if (response.ok) {
-                            const { collectionId } = await response.json();
-                            // 保存用户凭证并直接设置 Authorization 头
-                            saveUserAuth(username, password);
-                            // 使用 replace 而不是 href，避免浏览器历史记录
-                            window.location.replace('/user/' + collectionId);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            window.location.href = '/user?token=' + encodeURIComponent(data.sessionToken);
                         } else {
-                            alert('用户名或密码错误');
+                            showError(data.error || '登录失败');
                         }
                     } catch (error) {
-                        alert('访问失败，请稍后重试');
+                        showError('登录失败，请重试');
+                        console.error('Login error:', error);
+                    } finally {
+                        toggleLoading(false);
                     }
                 });
             </script>
@@ -116,156 +165,198 @@ function generateLoginPage(env) {
     });
 }
 
-function generateScripts(env, collectionId) {
-    return `
-        <script>
-            const CONFIG = {
-                SUB_WORKER_URL: '${env.SUB_WORKER_URL || CONFIG.SUB_WORKER_URL}'
-            };
-
-            // 获取用户凭证
-            function getUserAuth() {
-                return localStorage.getItem('user_auth');
-            }
-
-            // 添加用户凭证到请求头
-            async function fetchWithUserAuth(url, options = {}) {
-                const auth = getUserAuth();
-                if (auth) {
-                    options.headers = {
-                        ...options.headers,
-                        'Authorization': 'Basic ' + auth
-                    };
-                }
-                return fetch(url, options);
-            }
-
-            // 加载集合信息
-            async function loadCollection() {
-                const auth = getUserAuth();
-                if (!auth) {
-                    window.location.replace('/user');
-                    return;
-                }
-
-                try {
-                    const response = await fetchWithUserAuth('/api/collections');
-                    if (response.ok) {
-                        const collections = await response.json();
-                        const collection = collections.find(c => c.id === '${collectionId}');
-                        if (collection) {
-                            renderCollection(collection);
-                        } else {
-                            showError('找不到集合');
-                            setTimeout(() => window.location.replace('/user'), 2000);
-                        }
-                    } else if (response.status === 401) {
-                        localStorage.removeItem('user_auth');
-                        window.location.replace('/user');
-                    }
-                } catch (e) {
-                    console.error('加载集合失败:', e);
-                    showError('加载失败，请刷新重试');
-                }
-            }
-
-            // 页面加载时直接获取集合信息
-            loadCollection();
-
-            function renderCollection(collection) {
-                const collectionList = document.getElementById('collectionList');
-                collectionList.innerHTML = \`
-                    <div class="bg-white rounded-lg shadow-md p-6 space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-semibold text-gray-800">\${collection.name}</h2>
-                            <span class="text-sm text-gray-500">
-                                节点数量: \${collection.nodeIds?.length || 0}
-                            </span>
+function generateSecretPage(env, userData) {
+    try {
+        const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>订阅信息</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <link href="https://unpkg.com/tailwindcss@2/dist/tailwind.min.css" rel="stylesheet">
+                <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+            </head>
+            <body class="bg-gray-100 min-h-screen" data-page="secret">
+                <div class="container mx-auto px-4 py-8">
+                    <!-- 顶部导航栏 -->
+                    <nav class="bg-white shadow-lg rounded-lg mb-8">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="flex justify-between h-16">
+                                <div class="flex items-center">
+                                    <i class="fas fa-rocket text-blue-500 text-2xl mr-2"></i>
+                                    <span class="text-xl font-bold">订阅中心</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-gray-600 mr-4">
+                                        <i class="fas fa-user mr-2"></i>${userData.username}
+                                    </span>
+                                    <button id="logoutBtn" 
+                                        class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+                                        <i class="fas fa-sign-out-alt mr-2"></i>登出
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex flex-wrap gap-3">
-                                <button onclick="copySubscription('\${collection.id}', 'base')"
-                                    class="inline-flex items-center px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition duration-200">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                    </svg>
-                                    通用订阅
-                                </button>
-                                <button onclick="copySubscription('\${collection.id}', 'singbox')"
-                                    class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    SingBox订阅
-                                </button>
-                                <button onclick="copySubscription('\${collection.id}', 'clash')"
-                                    class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    Clash订阅
-                                </button>
+                    </nav>
+
+                    <!-- 订阅卡片 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- 通用订阅 -->
+                        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    <i class="fas fa-link text-blue-500 mr-2"></i>通用订阅
+                                </h2>
                             </div>
-                            <div class="text-sm text-gray-500">
-                                更新时间: \${new Date(collection.updatedAt || collection.createdAt).toLocaleString()}
+                            <p class="text-gray-600 mb-4">适用于大多数代理客户端的通用订阅格式</p>
+                            <button onclick="universalSubscription('${userData.collectionId}')"
+                                class="w-full flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-copy mr-2"></i>复制链接
+                            </button>
+                        </div>
+
+                        <!-- SingBox 订阅 -->
+                        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    <i class="fas fa-box text-green-500 mr-2"></i>SingBox
+                                </h2>
                             </div>
+                            <p class="text-gray-600 mb-4">专用于 SingBox 客户端的配置订阅</p>
+                            <button onclick="singboxSubscription('${userData.collectionId}')"
+                                class="w-full flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                                <i class="fas fa-copy mr-2"></i>复制链接
+                            </button>
+                        </div>
+
+                        <!-- Clash 订阅 -->
+                        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-semibold text-gray-800">
+                                    <i class="fas fa-bolt text-purple-500 mr-2"></i>Clash
+                                </h2>
+                            </div>
+                            <p class="text-gray-600 mb-4">专用于 Clash 客户端的配置订阅</p>
+                            <button onclick="clashSubscription('${userData.collectionId}')"
+                                class="w-full flex items-center justify-center px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors">
+                                <i class="fas fa-copy mr-2"></i>复制链接
+                            </button>
                         </div>
                     </div>
-                \`;
-            }
 
-            function copySubscription(id, type) {
-                const shareUrl = \`\${window.location.origin}/api/share/\${id}\`;
-                let subUrl;
-                
-                switch (type) {
-                    case 'base':
-                        subUrl = CONFIG.SUB_WORKER_URL ? 
-                            \`\${CONFIG.SUB_WORKER_URL}/base?url=\${encodeURIComponent(shareUrl)}\` :
-                            \`\${shareUrl}/base?internal=1\`;
-                        break;
-                    case 'singbox':
-                        subUrl = CONFIG.SUB_WORKER_URL ? 
-                            \`\${CONFIG.SUB_WORKER_URL}/singbox?url=\${encodeURIComponent(shareUrl)}\` :
-                            \`\${shareUrl}/singbox?internal=1\`;
-                        break;
-                    case 'clash':
-                        subUrl = CONFIG.SUB_WORKER_URL ? 
-                            \`\${CONFIG.SUB_WORKER_URL}/clash?url=\${encodeURIComponent(shareUrl)}\` :
-                            \`\${shareUrl}/clash?internal=1\`;
-                        break;
-                }
+                    <!-- 提示框 -->
+                    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg hidden transform transition-transform duration-300">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span id="toastMessage"></span>
+                        </div>
+                    </div>
+                </div>
 
-                copyToClipboard(subUrl, '订阅链接已复制到剪贴板');
-            }
+                <script>
+                    // 配置常量，直接使用 getConfig 处理的值
+                    const CONFIG = {
+                        SUB_WORKER_URL: '${getConfig('SUB_WORKER_URL', env)}',
+                        TEMPLATE_URL: '${getConfig('DEFAULT_TEMPLATE_URL', env)}',
+                        API: ${JSON.stringify(CONFIG.API)},
+                        SUBSCRIPTION: ${JSON.stringify(CONFIG.SUBSCRIPTION)}
+                    };
 
-            async function copyToClipboard(text, message) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    showToast(message);
-                } catch (e) {
-                    alert('复制失败');
-                }
-            }
+                    // 显示提示框
+                    function showToast(message, duration = 2000) {
+                        const toast = document.getElementById('toast');
+                        const toastMessage = document.getElementById('toastMessage');
+                        toastMessage.textContent = message;
+                        
+                        toast.classList.remove('hidden');
+                        toast.classList.add('translate-y-0');
+                        
+                        setTimeout(() => {
+                            toast.classList.add('translate-y-full');
+                            setTimeout(() => {
+                                toast.classList.add('hidden');
+                                toast.classList.remove('translate-y-full');
+                            }, 300);
+                        }, duration);
+                    }
 
-            function showToast(message) {
-                const toast = document.createElement('div');
-                toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg';
-                toast.textContent = message;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 2000);
-            }
+                    // 复制到剪贴板
+                    function copyToClipboard(text, message) {
+                        navigator.clipboard.writeText(text).then(() => {
+                            showToast(message);
+                        }).catch(() => {
+                            const input = document.createElement('input');
+                            input.value = text;
+                            document.body.appendChild(input);
+                            input.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(input);
+                            showToast(message);
+                        });
+                    }
 
-            function showError(message) {
-                const error = document.createElement('div');
-                error.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg';
-                error.textContent = message;
-                document.body.appendChild(error);
-                setTimeout(() => error.remove(), 3000);
-            }
-        </script>
-    `;
-} 
+                    // 生成订阅链接
+                    function generateSubscriptionUrl(id, type) {
+                        const shareUrl = window.location.origin + CONFIG.API.SHARE + '/' + id;
+                        
+                        // 只在非 base 类型时添加 template 参数，且只在有模板 URL 时添加
+                        const templateParam = (type !== 'base' && CONFIG.TEMPLATE_URL) ? 
+                            '&template=' + encodeURIComponent(CONFIG.TEMPLATE_URL) : '';
+                        
+                        // 根据类型获取订阅路径
+                        const typePath = type === 'base' ? CONFIG.SUBSCRIPTION.BASE_PATH :
+                                       type === 'singbox' ? CONFIG.SUBSCRIPTION.SINGBOX_PATH :
+                                       type === 'clash' ? CONFIG.SUBSCRIPTION.CLASH_PATH : '';
+                        
+                        if (CONFIG.SUB_WORKER_URL) {
+                            return \`\${CONFIG.SUB_WORKER_URL}\${typePath}?url=\${encodeURIComponent(shareUrl)}\${templateParam}\`;
+                        } else {
+                            return \`\${shareUrl}\${typePath}?internal=1\${templateParam}\`;
+                        }
+                    }
+
+                    // 订阅链接处理函数
+                    function universalSubscription(id) {
+                        const subUrl = generateSubscriptionUrl(id, 'base');
+                        copyToClipboard(subUrl, '通用订阅链接已复制');
+                    }
+
+                    function singboxSubscription(id) {
+                        const subUrl = generateSubscriptionUrl(id, 'singbox');
+                        copyToClipboard(subUrl, 'SingBox订阅链接已复制');
+                    }
+
+                    function clashSubscription(id) {
+                        const subUrl = generateSubscriptionUrl(id, 'clash');
+                        copyToClipboard(subUrl, 'Clash订阅链接已复制');
+                    }
+
+                    // 登出功能
+                    document.getElementById('logoutBtn').onclick = async function() {
+                        try {
+                            const token = new URLSearchParams(window.location.search).get('token');
+                            if (token) {
+                                await fetch('/api/user/logout?token=' + encodeURIComponent(token));
+                            }
+                        } catch (error) {
+                            console.error('Logout error:', error);
+                        } finally {
+                            window.location.href = '/user';
+                        }
+                    };
+                </script>
+            </body>
+            </html>
+        `;
+
+        return new Response(html, {
+            headers: { 'Content-Type': 'text/html;charset=utf-8' }
+        });
+    } catch (error) {
+        return new Response('Error: ' + error.message, { 
+            status: 500,
+            headers: { 'Content-Type': 'text/plain' }
+        });
+    }
+}

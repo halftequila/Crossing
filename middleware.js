@@ -1,6 +1,17 @@
 export class ErrorHandler {
     static handle(error, request) {
-        console.error('Error:', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
+
+        // 添加 CORS 头
+        const headers = {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        };
 
         if (error instanceof ValidationError) {
             return new Response(JSON.stringify({
@@ -8,10 +19,7 @@ export class ErrorHandler {
                 code: 'VALIDATION_ERROR'
             }), {
                 status: 400,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                }
+                headers
             });
         }
 
@@ -21,24 +29,17 @@ export class ErrorHandler {
                 code: 'AUTH_ERROR'
             }), {
                 status: 401,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'WWW-Authenticate': 'Basic realm="Admin Access"'
-                }
+                headers
             });
         }
 
-        // 默认错误响应
         return new Response(JSON.stringify({
             error: 'Internal Server Error',
-            code: 'INTERNAL_ERROR'
+            code: 'INTERNAL_ERROR',
+            message: error.message  // 添加具体错误信息
         }), {
             status: 500,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            }
+            headers
         });
     }
 }

@@ -2,7 +2,10 @@
 
 SubHub 是一个基于 Cloudflare Workers 的节点订阅管理系统，支持多种代理协议和订阅格式。
 
-## 功能特点
+### 2024-03 更新
+- 优化了环境变量处理逻辑
+- 改进了订阅链接生成机制
+- 增强了安全性检查
 
 - 🚀 支持多种代理协议
   - VLESS
@@ -58,8 +61,7 @@ SubHub 是一个基于 Cloudflare Workers 的节点订阅管理系统，支持�
    DEFAULT_USERNAME: admin          # 必设，默认为 admin
    DEFAULT_PASSWORD: your_password  # 必设，默认为 admin
    SUB_WORKER_URL: https://xxx     # 可选，外部订阅转换服务地址
-   SUBSCRIBER_URL: https://xxx      # 可选，自选订阅器地址，无作用
-   QUICK_SUB_URL: https://xxx      # 可选，快速订阅器地址，无作用
+   DEFAULT_TEMPLATE_URL: https://xxx # 建议必设，默认订阅模板地址
    ```
 
 4. 绑定 KV 命名空间
@@ -84,7 +86,7 @@ SubHub 是一个基于 Cloudflare Workers 的节点订阅管理系统，支持�
 | SUB_WORKER_URL | 否 | 外部订阅转换服务地址，用于转换订阅格式 |
 | SUBSCRIBER_URL | 否 | 自选订阅器地址，用于生成自定义订阅 |
 | QUICK_SUB_URL | 否 | 快速订阅器地址，用于快速生成订阅 |
-| DEFAULT_TEMPLATE_URL | 否 | 默认订阅模板地址，用于生成配置文件，建议配置自己的需求 |
+| DEFAULT_TEMPLATE_URL | 是 | 默认订阅模板，用于生成配合singbox和clash订阅生成，建议配置自己的需求 |
 
 ### KV 存储说明
 

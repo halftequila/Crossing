@@ -6,10 +6,8 @@ export const CONFIG = {
 
     // 外部服务配置
     SUB_WORKER_URL: '',
-    SUBSCRIBER_URL: 'https://bestipsub.8669.xyz/', //自选订阅外链，非必须
-    QUICK_SUB_URL: 'https://resubname.8669.xyz/', //快速订阅外链，非必须
-
-    // 默认模板配置
+    SUBSCRIBER_URL: '',
+    QUICK_SUB_URL: '',
     DEFAULT_TEMPLATE_URL: 'https://raw.githubusercontent.com/Troywww/singbox_conf/main/singbox_clash_conf.txt',
 
     // 认证配置
@@ -28,11 +26,18 @@ export const CONFIG = {
         NODES: '/api/nodes',
         COLLECTIONS: '/api/collections',
         SHARE: '/api/share',
-        USER: '/api/user'
+        USER: {
+            BASE: '/api/user',
+            LOGIN: '/api/user/login',
+            PAGE: '/user',
+            LOGOUT: '/api/user/logout'
+        }
     },
 
     // 用户访问配置
     USER_TOKENS_KEY: 'user_tokens',  // 存储用户令牌的KV key
+    USER_SESSION_KEY: 'user_sessions',
+    USER_SESSION_EXPIRE: 86400, // 24小时
 
     // SingBox 基础配置
     SINGBOX_BASE_CONFIG: {
@@ -140,4 +145,44 @@ dns:
     - '*.battlenet.com'
     - '*.blzstatic.cn'
     - '*.battle.net'`,
-}; 
+
+    COOKIE: {
+        SESSION_NAME: 'session',
+        MAX_AGE: 86400  // 24小时
+    },
+
+    // 用户会话配置
+    USER: {
+        BASE: '/api/user',
+        LOGIN: '/api/user/login',
+        PAGE: '/user',
+        SECRET: '/user/secret'
+    },
+
+    // 会话过期时间（24小时）
+    SESSION_TTL: 24 * 60 * 60,
+
+    // KV key 前缀
+    KV_PREFIX: {
+        SESSION: 'session:'  // 会话数据前缀
+    }
+};
+
+// 获取配置值，优先使用环境变量
+export function getConfig(key, env = {}) {
+    // 环境变量名称映射
+    const envMap = {
+        SUB_WORKER_URL: 'SUB_WORKER_URL',
+        SUBSCRIBER_URL: 'SUBSCRIBER_URL',
+        QUICK_SUB_URL: 'QUICK_SUB_URL',
+        DEFAULT_TEMPLATE_URL: 'DEFAULT_TEMPLATE_URL'
+    };
+
+    // 如果存在对应的环境变量，优先使用环境变量的值
+    if (envMap[key] && env[envMap[key]]) {
+        return env[envMap[key]];
+    }
+
+    // 否则返回配置文件中的默认值
+    return CONFIG[key];
+}
