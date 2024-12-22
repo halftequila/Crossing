@@ -2,25 +2,6 @@
 
 Subhouse 是一个基于 Cloudflare Workers 的节点订阅管理系统，支持多种代理协议和订阅格式。
 
-### 2024-03 更新
-- 优化了环境变量处理逻辑
-- 改进了订阅链接生成机制
-- 增强了安全性检查
-
-- 🚀 支持多种代理协议
-  - VLESS
-  - VMess
-  - Trojan
-  - Shadowsocks
-  - Hysteria
-  - Hysteria2
-  - TUIC
-  
-- 📦 支持多种订阅格式
-  - 通用格式
-  - SingBox
-  - Clash
-
 - 🔐 安全特性
   - 基本身份认证
   - 集合级别访问控制
@@ -40,6 +21,11 @@ Subhouse 是一个基于 Cloudflare Workers 的节点订阅管理系统，支持
   - 生成订阅链接
   - 自定义订阅模板
   - 支持外部订阅转换
+
+- 📦 支持多种订阅格式
+  - 通用格式
+  - SingBox
+  - Clash
 
 ## 部署说明
 
