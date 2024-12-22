@@ -1,6 +1,6 @@
-# SubHub - 订阅管理系统
+# SubHouse - 订阅管理系统
 
-SubHub 是一个基于 Cloudflare Workers 的节点订阅管理系统，支持多种代理协议和订阅格式。
+Subhouse 是一个基于 Cloudflare Workers 的节点订阅管理系统，支持多种代理协议和订阅格式。
 
 ### 2024-03 更新
 - 优化了环境变量处理逻辑
