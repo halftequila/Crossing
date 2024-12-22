@@ -100,37 +100,33 @@ function generateHead() {
 // 生成页面头部
 function generateHeader(CONFIG, env) {
     return `
-        <header class="bg-white shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <header class="bg-white shadow-lg rounded-xl mb-8 backdrop-blur-lg bg-opacity-90">
+            <div class="max-w-7xl mx-auto py-6 px-6 sm:px-8">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-3xl font-bold text-gray-900">节点管理系统</h1>
+                    <div class="flex items-center">
+                        <i class="fas fa-server text-blue-500 text-3xl mr-3"></i>
+                        <div>
+                            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+                                节点管理系统
+                            </h1>
+                            <p class="text-sm text-gray-500 mt-1">Node Management System</p>
+                        </div>
+                    </div>
                     <div class="flex items-center space-x-4">
                         <div class="flex space-x-2">
                             <button onclick="openUserLogin()"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
-                                用户登录
+                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-yellow-500 hover:bg-yellow-600 transition-all duration-200">
+                                <i class="fas fa-user text-white mr-2"></i>用户登录
                             </button>
                         </div>
                         <div class="flex space-x-2">
                             <button onclick="openSubscriber()"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M4 6h16M4 12h16m-7 6h7"/>
-                                </svg>
-                                自选订阅器
+                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition-all duration-200">
+                                <i class="fas fa-list text-white mr-2"></i>自选订阅器
                             </button>
                             <button onclick="openQuickSubscriber()"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                </svg>
-                                快速订阅器
+                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600 transition-all duration-200">
+                                <i class="fas fa-bolt text-white mr-2"></i>快速订阅器
                             </button>
                         </div>
                     </div>
@@ -157,19 +153,21 @@ function generateMainContent(CONFIG) {
 // 生成节点管理部分
 function generateNodeManager() {
     return `
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800">节点管理</h2>
-            <div class="space-y-4">
+        <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-all duration-300">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-network-wired text-blue-500 mr-3"></i>节点管理
+            </h2>
+            <div class="space-y-6">
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="flex-1 flex flex-col md:flex-row gap-4">
                         <input type="text" id="nodeName" placeholder="节点名称"
-                            class="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            class="w-full md:w-1/3 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
                         <input type="text" id="nodeUrl" placeholder="节点URL"
-                            class="w-full md:w-2/3 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            class="w-full md:w-2/3 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
                     </div>
                     <button onclick="addNode()"
-                        class="whitespace-nowrap px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200">
-                        添加节点
+                        class="whitespace-nowrap px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg">
+                        <i class="fas fa-plus mr-2"></i>添加节点
                     </button>
                 </div>
                 <div id="nodeList" class="space-y-4"></div>
@@ -275,25 +273,45 @@ function generateNodeScripts() {
         function renderNodes(nodes) {
             const nodeList = document.getElementById('nodeList');
             nodeList.innerHTML = nodes.map(node => \`
-                <div class="bg-gray-50 rounded-lg p-4 space-y-2">
-                    <h3 class="font-semibold text-gray-800">\${node.name}</h3>
-                    <div class="text-sm text-gray-600 truncate">\${node.url}</div>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="editNode('\${node.id}')"
-                            class="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition duration-200">
-                            编辑
-                        </button>
-                        <button onclick="copyNode('\${node.id}')"
-                            class="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200">
-                            复制
-                        </button>
-                        <button onclick="deleteNode('\${node.id}')"
-                            class="px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200">
-                            删除
-                        </button>
+                <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                    <div class="flex justify-between items-center">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-medium text-gray-800 flex items-center mb-1">
+                                <i class="fas fa-network-wired text-blue-500 mr-2"></i>
+                                \${node.name}
+                            </h3>
+                            <div class="text-sm text-gray-500 font-mono truncate">
+                                \${node.url}
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 ml-4">
+                            <button onclick="editNode('\${node.id}')"
+                                class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"
+                                title="编辑节点">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="copyNode('\${node.id}')"
+                                class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"
+                                title="复制链接">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button onclick="deleteNode('\${node.id}')"
+                                class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                                title="删除节点">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             \`).join('');
+
+            // 添加 Font Awesome 图标库
+            if (!document.querySelector('link[href*="font-awesome"]')) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+                document.head.appendChild(link);
+            }
         }
 
         async function addNode() {
