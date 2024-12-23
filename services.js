@@ -274,7 +274,7 @@ export class CollectionsService extends BaseService {
 
     async handlePut(request) {
         try {
-            const { id, nodeIds, username, password, name } = await request.json();
+            const { id, nodeIds, username, password, expiry } = await request.json();
             if (!id) {
                 throw new Error('Missing collection id');
             }
@@ -286,18 +286,34 @@ export class CollectionsService extends BaseService {
                 throw new Error('Collection not found');
             }
 
+            // 更新用户令牌
+            const tokensData = await this.env.NODE_STORE.get(CONFIG.USER_TOKENS_KEY) || '[]';
+            const tokens = JSON.parse(tokensData);
+            const tokenIndex = tokens.findIndex(t => t.collectionId === id);
+            
+            const token = {
+                username: username || (tokenIndex >= 0 ? tokens[tokenIndex].username : `user_${id.slice(0, 6)}`),
+                password: password || (tokenIndex >= 0 ? tokens[tokenIndex].password : ''),
+                collectionId: id,
+                expiry: expiry || null,  // 确保有效期被保存
+                createdAt: new Date().toISOString()
+            };
+
+            if (tokenIndex >= 0) {
+                tokens[tokenIndex] = token;
+            } else {
+                tokens.push(token);
+            }
+
+            // 保存更新后的令牌
+            await this.env.NODE_STORE.put(CONFIG.USER_TOKENS_KEY, JSON.stringify(tokens));
+
             // 更新集合信息
             collections[collectionIndex] = {
                 ...collections[collectionIndex],
-                name: name || collections[collectionIndex].name,
                 nodeIds: nodeIds || collections[collectionIndex].nodeIds,
                 updatedAt: new Date().toISOString()
             };
-
-            // 如果提供了密码，更新访问凭证
-            if (password) {
-                await this.setCollectionPassword(id, username, password);
-            }
 
             await this.setCollections(collections);
             return new Response(JSON.stringify(collections[collectionIndex]), {

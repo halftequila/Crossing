@@ -699,6 +699,13 @@ function generateCollectionScripts() {
                 userToken = await response.json();
             }
 
+            // 格式化日期为 YYYY-MM-DD 格式
+            const formatDateForInput = (dateString) => {
+                if (!dateString) return '';
+                const date = new Date(dateString);
+                return date.toISOString().split('T')[0];
+            };
+
             const dialog = document.createElement('div');
             dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center';
             dialog.innerHTML = \`
@@ -731,11 +738,14 @@ function generateCollectionScripts() {
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">有效期</label>
-                        <input type="date" id="collectionExpiry" value="\${userToken.expiry || ''}"
+                        <input type="date" id="collectionExpiry" 
+                            value="\${formatDateForInput(userToken.expiry)}"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
                         <p class="mt-1 text-sm text-gray-500">可选，设置订阅的有效期</p>
                         \${userToken.expiry ? \`
-                            <p class="mt-1 text-sm text-blue-600">当前有效期: \${new Date(userToken.expiry).toLocaleDateString()}</p>
+                            <p class="mt-1 text-sm text-blue-600">
+                                当前有效期: \${new Date(userToken.expiry).toLocaleDateString()}
+                            </p>
                         \` : ''}
                     </div>
                     <div>
@@ -781,16 +791,20 @@ function generateCollectionScripts() {
                         nodeIds, 
                         username, 
                         password,
-                        expiry  // 添加有效期
+                        expiry: expiry || null  // 确保有效期被发送
                     })
                 });
                 
                 if (response.ok) {
                     document.querySelector('.fixed').remove();
                     await loadCollections();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || '更新失败');
                 }
             } catch (e) {
-                alert('更新集合失败');
+                console.error('Update failed:', e);
+                alert('更新集合失败: ' + e.message);
             }
         }
 
@@ -819,7 +833,7 @@ function generateCollectionScripts() {
                 await navigator.clipboard.writeText(shareUrl);
                 showToast('分享链接已复制到剪贴板');
             } catch (e) {
-                alert('复制分享链接失败');
+                alert('复制��享链接失败');
             }
         }
 
