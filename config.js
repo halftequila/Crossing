@@ -50,24 +50,16 @@ export const CONFIG = {
             servers: [
                 {
                     tag: "dns_proxy",
-                    address: "tls://1.1.1.1",
-                    address_resolver: "dns_resolver"
+                    address: "tls://1.1.1.1"
                 },
                 {
                     tag: "dns_direct",
-                    address: "h3://dns.alidns.com/dns-query",
-                    address_resolver: "dns_resolver",
-                    detour: "direct",
-                    strategy: "ipv4_only"
+                    address: "https://223.5.5.5/dns-query",
+                    detour: "direct"
                 },
                 {
                     tag: "dns_fakeip",
                     address: "fakeip"
-                },
-                {
-                    tag: "dns_resolver",
-                    address: "223.5.5.5",
-                    detour: "direct"
                 },
                 {
                     tag: "block",
@@ -76,16 +68,10 @@ export const CONFIG = {
             ],
             rules: [
                 {
-                    outbound: [
-                        "any"
-                    ],
-                    server: "dns_resolver"
-                },
-                {
                     geosite: [
                         "category-ads-all"
                     ],
-                    server: "dns_block",
+                    server: "block",
                     disable_cache: true
                 },
                 {
@@ -100,12 +86,12 @@ export const CONFIG = {
                 },
                 {
                     geosite: [
-                        "geolocation-!cn"
+                        "cn"
                     ],
-                    server: "dns_proxy"
+                    server: "dns_direct"
                 }
             ],
-            final: "dns_direct",
+            final: "dns_proxy",
             independent_cache: true,
             fakeip: {
                 enabled: true,
