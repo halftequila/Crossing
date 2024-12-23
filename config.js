@@ -76,6 +76,10 @@ export const CONFIG = {
             ],
             rules: [
                 {
+                    outbound: ["any"],
+                    server: "dns_resolver"
+                },
+                {
                     geosite: [
                         "category-ads-all"
                     ],
@@ -105,10 +109,10 @@ export const CONFIG = {
                         "workers.dev",
                         "+.workers.dev"
                     ],
-                    server: "dns_direct"  // Cloudflare 相关域名使用直连 DNS
+                    server: "dns_direct"
                 }
             ],
-            final: "dns_direct",  // 改回直连 DNS
+            final: "dns_direct",
             independent_cache: true,
             fakeip: {
                 enabled: true,
