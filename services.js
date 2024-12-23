@@ -275,7 +275,9 @@ export class CollectionsService extends BaseService {
     async handlePut(request) {
         try {
             const { id, nodeIds, username, password, expiry, name } = await request.json();
-            console.log('Received update request with name:', name);  // 添加日志
+            if (!id) {
+                throw new Error('Missing collection id');
+            }
 
             const collections = await this.getCollections();
             const collectionIndex = collections.findIndex(c => c.id === id);
@@ -308,18 +310,20 @@ export class CollectionsService extends BaseService {
             // 更新集合信息
             collections[collectionIndex] = {
                 ...collections[collectionIndex],
-                name: name || collections[collectionIndex].name,  // 更新名称
+                name: name || collections[collectionIndex].name,
                 nodeIds: nodeIds || collections[collectionIndex].nodeIds,
                 updatedAt: new Date().toISOString()
             };
 
             await this.setCollections(collections);
-            console.log('Updated collection:', collections[collectionIndex]);  // 添加日志
-            
-            return new Response(JSON.stringify(collections[collectionIndex]));
+            return new Response(JSON.stringify(collections[collectionIndex]), {
+                headers: { 'Content-Type': 'application/json' }
+            });
         } catch (e) {
-            console.error('Update error:', e);  // 添加错误日志
-            return new Response(JSON.stringify({ error: e.message }), { status: 400 });
+            return new Response(JSON.stringify({ error: e.message }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
     }
 

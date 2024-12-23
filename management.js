@@ -791,8 +791,6 @@ function generateCollectionScripts() {
             }
 
             const name = nameInput.value;
-            console.log('Input name value:', name); // 调试日志
-
             const username = dialog.querySelector('#collectionUsername').value;
             const password = dialog.querySelector('#collectionPassword').value;
             const expiry = dialog.querySelector('#collectionExpiry').value;
@@ -800,7 +798,6 @@ function generateCollectionScripts() {
                 .map(checkbox => checkbox.value);
             
             try {
-                console.log('Sending update with data:', { id, name, nodeIds, username, password, expiry }); // 调试日志
                 const response = await fetchWithAuth('/api/collections', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -815,8 +812,6 @@ function generateCollectionScripts() {
                 });
                 
                 if (response.ok) {
-                    const updatedData = await response.json();
-                    console.log('Update successful:', updatedData); // 调试日志
                     dialog.remove();
                     await loadCollections();
                 } else {
