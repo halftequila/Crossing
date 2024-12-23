@@ -41,40 +41,67 @@ export const CONFIG = {
 
     // SingBox 基础配置
     SINGBOX_BASE_CONFIG: {
+        log: {
+            disabled: false,
+            level: "info",
+            timestamp: true
+        },
         dns: {
             servers: [
                 {
                     tag: "dns_proxy",
-                    address: "https://1.1.1.1/dns-query",
-                    detour: "proxy"
+                    address: "tls://1.1.1.1",
+                    address_resolver: "dns_resolver"
                 },
                 {
                     tag: "dns_direct",
-                    address: "https://223.5.5.5/dns-query",
-                    detour: "direct"
-                },
-                {
-                    tag: "dns_block",
-                    address: "rcode://success"
+                    address: "h3://dns.alidns.com/dns-query",
+                    address_resolver: "dns_resolver",
+                    detour: "direct",
+                    strategy: "ipv4_only"
                 },
                 {
                     tag: "dns_fakeip",
                     address: "fakeip"
+                },
+                {
+                    tag: "dns_resolver",
+                    address: "223.5.5.5",
+                    detour: "direct"
+                },
+                {
+                    tag: "block",
+                    address: "rcode://success"
                 }
             ],
             rules: [
                 {
-                    geosite: ["category-ads-all"],
+                    outbound: [
+                        "any"
+                    ],
+                    server: "dns_resolver"
+                },
+                {
+                    geosite: [
+                        "category-ads-all"
+                    ],
                     server: "dns_block",
                     disable_cache: true
                 },
                 {
-                    geosite: ["geolocation-!cn"],
-                    query_type: ["A", "AAAA"],
+                    geosite: [
+                        "geolocation-!cn"
+                    ],
+                    query_type: [
+                        "A",
+                        "AAAA"
+                    ],
                     server: "dns_fakeip"
                 },
                 {
-                    geosite: ["geolocation-!cn"],
+                    geosite: [
+                        "geolocation-!cn"
+                    ],
                     server: "dns_proxy"
                 }
             ],
@@ -105,7 +132,7 @@ export const CONFIG = {
                 inet4_address: "172.19.0.1/30",
                 auto_route: true,
                 strict_route: true,
-                stack: "system",
+                stack: "mixed",
                 sniff: true
             }
         ]
