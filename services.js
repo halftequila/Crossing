@@ -454,7 +454,7 @@ export class ShareService extends BaseService {
         // 创建一个新的 Request 对象但不通过 headers 传递点
         const newRequest = new Request(request.url, {
             ...request,
-            // 添加自定义属性来传递��点数据
+            // 添加自定义属性来传递点数据
             nodeData: nodes
         });
 
@@ -724,7 +724,12 @@ export class UserService extends BaseService {
                         currentBrowser.userAgent === session.browserInfo.userAgent &&
                         currentBrowser.platform === session.browserInfo.platform
                     ) {
-                        return session;
+                        // 获取用户令牌信息
+                        const userToken = await this.getUserToken(session.collectionId);
+                        return {
+                            ...session,
+                            expiry: userToken?.expiry || null
+                        };
                     }
                 }
             }
@@ -738,6 +743,18 @@ export class UserService extends BaseService {
     async deleteSession(sessionToken) {
         if (sessionToken) {
             await this.env.NODE_STORE.delete(CONFIG.KV_PREFIX.SESSION + sessionToken);
+        }
+    }
+
+    // 新增方法：获取用户令牌信息
+    async getUserToken(collectionId) {
+        try {
+            const tokensData = await this.env.NODE_STORE.get(CONFIG.USER_TOKENS_KEY);
+            const tokens = tokensData ? JSON.parse(tokensData) : [];
+            return tokens.find(t => t.collectionId === collectionId) || null;
+        } catch (error) {
+            console.error('Get user token error:', error);
+            return null;
         }
     }
 }

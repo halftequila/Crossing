@@ -527,63 +527,64 @@ function generateCollectionScripts() {
         function renderCollections(collections) {
             const collectionList = document.getElementById('collectionList');
             collectionList.innerHTML = collections.map(collection => \`
-                <div class="bg-white rounded-lg shadow-md p-4 space-y-3 hover:shadow-lg transition-shadow duration-200">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-gray-800">\${collection.name}</h3>
-                        <div class="flex space-x-2">
-                            <button onclick="editCollection('\${collection.id}')"
-                                class="p-1 text-green-600 hover:text-green-700 transition-colors duration-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200">
+                    <div class="flex flex-col space-y-4">
+                        <!-- 集合标题、有效期和操作按钮 -->
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                        <i class="fas fa-layer-group text-blue-500 mr-2"></i>
+                                        \${collection.name}
+                                    </h3>
+                                    <span id="expiry_\${collection.id}" class="text-sm text-gray-500">
+                                        <!-- 有效期将通过 updateCollectionNodes 函数更新 -->
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="editCollection('\${collection.id}')"
+                                    class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"
+                                    title="编辑集合">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteCollection('\${collection.id}')"
+                                    class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                                    title="删除集合">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 节点列表 -->
+                        <div id="nodeList_\${collection.id}" class="flex flex-wrap gap-2">
+                            <!-- 节点列表将通过 updateCollectionNodes 函数更新 -->
+                        </div>
+
+                        <!-- 操作按钮组 -->
+                        <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
+                            <button onclick="shareCollection('\${collection.id}')"
+                                class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-share-alt mr-1.5"></i>分享
                             </button>
-                            <button onclick="deleteCollection('\${collection.id}')"
-                                class="p-1 text-red-600 hover:text-red-700 transition-colors duration-200">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
+                            <button onclick="universalSubscription('\${collection.id}')"
+                                class="inline-flex items-center px-3 py-1.5 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 transition-colors">
+                                <i class="fas fa-link mr-1.5"></i>通用订阅
+                            </button>
+                            <button onclick="singboxSubscription('\${collection.id}')"
+                                class="inline-flex items-center px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors">
+                                <i class="fas fa-box mr-1.5"></i>SingBox订阅
+                            </button>
+                            <button onclick="clashSubscription('\${collection.id}')"
+                                class="inline-flex items-center px-3 py-1.5 bg-purple-500 text-white text-sm rounded-lg hover:bg-purple-600 transition-colors">
+                                <i class="fas fa-bolt mr-1.5"></i>Clash订阅
                             </button>
                         </div>
-                    </div>
-                    <div id="nodeList_\${collection.id}" class="flex flex-wrap gap-2">
-                        <!-- 节点标签将通过 updateCollectionNodes 函数更新 -->
-                    </div>
-                    <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
-                        <button onclick="shareCollection('\${collection.id}')"
-                            class="inline-flex items-center px-3 py-1.5 bg-indigo-500 text-white text-sm rounded-md hover:bg-indigo-600 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-                            </svg>分享
-                        </button>
-                        <button onclick="universalSubscription('\${collection.id}')"
-                            class="inline-flex items-center px-3 py-1.5 bg-purple-500 text-white text-sm rounded-md hover:bg-purple-600 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                            </svg>通用订阅
-                        </button>
-                        <button onclick="singboxSubscription('\${collection.id}')"
-                            class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>SingBox订阅
-                        </button>
-                        <button onclick="clashSubscription('\${collection.id}')"
-                            class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>Clash订阅
-                        </button>
                     </div>
                 </div>
             \`).join('');
 
-            // 更新每个集合的节点列表
+            // 更新每个集合的节点列表和有效期
             collections.forEach(collection => {
                 updateCollectionNodes(collection);
             });
@@ -591,14 +592,42 @@ function generateCollectionScripts() {
 
         async function updateCollectionNodes(collection) {
             try {
-                const response = await fetchWithAuth('/api/nodes');
-                const nodes = await response.json();
+                const [nodesResponse, tokenResponse] = await Promise.all([
+                    fetchWithAuth('/api/nodes'),
+                    fetchWithAuth(\`/api/collections/token/\${collection.id}\`)
+                ]);
+                
+                const nodes = await nodesResponse.json();
+                const token = await tokenResponse.json();
                 const collectionNodes = nodes.filter(node => collection.nodeIds.includes(node.id));
                 
+                // 更新有效期显示
+                const expiryElement = document.getElementById(\`expiry_\${collection.id}\`);
+                if (expiryElement && token.expiry) {
+                    const expDate = new Date(token.expiry);
+                    const isExpired = expDate < new Date();
+                    expiryElement.innerHTML = \`
+                        <span class="text-gray-500">
+                            (到期：\${expDate.toLocaleDateString('zh-CN', {
+                                year: 'numeric',
+                                month: 'numeric',
+                                day: 'numeric'
+                            })})
+                        </span>
+                        \${isExpired ? \`
+                            <span class="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 text-xs rounded-full">
+                                已过期
+                            </span>
+                        \` : ''}
+                    \`;
+                }
+                
+                // 更新节点列表，使用更简洁的样式
                 const nodeList = document.getElementById(\`nodeList_\${collection.id}\`);
                 if (nodeList) {
                     nodeList.innerHTML = collectionNodes.map(node => \`
-                        <span class="px-2 py-1 bg-blue-50 text-blue-600 text-sm rounded-full">
+                        <span class="inline-flex items-center px-3 py-1 bg-gray-50 text-gray-700 text-sm rounded-lg">
+                            <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
                             \${node.name}
                         </span>
                     \`).join('');
@@ -680,27 +709,34 @@ function generateCollectionScripts() {
                         <input type="text" id="collectionName" value="\${collection.name}"
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
                     </div>
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">访问用户名</label>
-                                <input type="text" id="collectionUsername" value="\${userToken.username || ''}"
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                                <p class="mt-1 text-sm text-gray-500">留空将自动生成用户名</p>
-                                \${userToken.username ? \`
-                                    <p class="mt-1 text-sm text-blue-600">当前用户名: \${userToken.username}</p>
-                                \` : ''}
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">访问密码</label>
-                                <input type="text" id="collectionPassword" value=""
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                                <p class="mt-1 text-sm text-gray-500">设置后需要密码才能访问此集合</p>
-                                \${userToken.password ? \`
-                                    <p class="mt-1 text-sm text-blue-600">当前密码: \${userToken.password}</p>
-                                \` : ''}
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">访问用户名</label>
+                            <input type="text" id="collectionUsername" value="\${userToken.username || ''}"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <p class="mt-1 text-sm text-gray-500">留空将自动生成用户名</p>
+                            \${userToken.username ? \`
+                                <p class="mt-1 text-sm text-blue-600">当前用户名: \${userToken.username}</p>
+                            \` : ''}
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">访问密码</label>
+                            <input type="text" id="collectionPassword" value=""
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <p class="mt-1 text-sm text-gray-500">设置后需要密码才能访问此集合</p>
+                            \${userToken.password ? \`
+                                <p class="mt-1 text-sm text-blue-600">当前密码: \${userToken.password}</p>
+                            \` : ''}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">有效期</label>
+                        <input type="date" id="collectionExpiry" value="\${userToken.expiry || ''}"
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <p class="mt-1 text-sm text-gray-500">可选，设置订阅的有效期</p>
+                        \${userToken.expiry ? \`
+                            <p class="mt-1 text-sm text-blue-600">当前有效期: \${new Date(userToken.expiry).toLocaleDateString()}</p>
+                        \` : ''}
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">选择节点</label>
@@ -732,14 +768,21 @@ function generateCollectionScripts() {
         async function updateCollection(id) {
             const username = document.getElementById('collectionUsername').value;
             const password = document.getElementById('collectionPassword').value;
-            const nodeIds = Array.from(document.querySelectorAll('.fixed input:checked'))
+            const expiry = document.getElementById('collectionExpiry').value;
+            const nodeIds = Array.from(document.querySelectorAll('.fixed input[type="checkbox"]:checked'))
                 .map(checkbox => checkbox.value);
             
             try {
                 const response = await fetchWithAuth('/api/collections', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, nodeIds, username, password })
+                    body: JSON.stringify({ 
+                        id, 
+                        nodeIds, 
+                        username, 
+                        password,
+                        expiry  // 添加有效期
+                    })
                 });
                 
                 if (response.ok) {

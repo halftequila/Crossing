@@ -191,6 +191,15 @@ function generateSecretPage(env, userData) {
                                 <div class="flex items-center">
                                     <span class="text-gray-600 mr-4">
                                         <i class="fas fa-user mr-2"></i>${userData.username}
+                                        ${userData.expiry ? `
+                                            <span class="text-sm text-gray-500 ml-2">
+                                                (到期：${new Date(userData.expiry).toLocaleDateString('zh-CN', {
+                                                    year: 'numeric',
+                                                    month: 'numeric',
+                                                    day: 'numeric'
+                                                })})
+                                            </span>
+                                        ` : ''}
                                     </span>
                                     <button id="logoutBtn" 
                                         class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
@@ -204,7 +213,7 @@ function generateSecretPage(env, userData) {
                     <!-- 订阅卡片 -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- 通用订阅 -->
-                        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform">
+                        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
                             <div class="flex items-center justify-between mb-4">
                                 <h2 class="text-xl font-semibold text-gray-800">
                                     <i class="fas fa-link text-blue-500 mr-2"></i>通用订阅
@@ -213,18 +222,18 @@ function generateSecretPage(env, userData) {
                             <p class="text-gray-600 mb-4">适用于大多数代理客户端的通用订阅格式</p>
                             <div class="flex space-x-2">
                                 <button onclick="universalSubscription('${userData.collectionId}')"
-                                    class="flex-1 flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                    class="flex-1 flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all duration-200">
                                     <i class="fas fa-copy mr-2"></i>复制链接
                                 </button>
                                 <button onclick="showQRCode('base', '${userData.collectionId}')"
-                                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all duration-200">
                                     <i class="fas fa-qrcode"></i>
                                 </button>
                             </div>
                         </div>
 
                         <!-- SingBox 订阅 -->
-                        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform">
+                        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
                             <div class="flex items-center justify-between mb-4">
                                 <h2 class="text-xl font-semibold text-gray-800">
                                     <i class="fas fa-box text-green-500 mr-2"></i>SingBox
@@ -233,18 +242,18 @@ function generateSecretPage(env, userData) {
                             <p class="text-gray-600 mb-4">专用于 SingBox 客户端的配置订阅</p>
                             <div class="flex space-x-2">
                                 <button onclick="singboxSubscription('${userData.collectionId}')"
-                                    class="flex-1 flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                                    class="flex-1 flex items-center justify-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-all duration-200">
                                     <i class="fas fa-copy mr-2"></i>复制链接
                                 </button>
                                 <button onclick="showQRCode('singbox', '${userData.collectionId}')"
-                                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-all duration-200">
                                     <i class="fas fa-qrcode"></i>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Clash 订阅 -->
-                        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform">
+                        <div class="bg-white rounded-lg shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
                             <div class="flex items-center justify-between mb-4">
                                 <h2 class="text-xl font-semibold text-gray-800">
                                     <i class="fas fa-bolt text-purple-500 mr-2"></i>Clash
@@ -253,11 +262,11 @@ function generateSecretPage(env, userData) {
                             <p class="text-gray-600 mb-4">专用于 Clash 客户端的配置订阅</p>
                             <div class="flex space-x-2">
                                 <button onclick="clashSubscription('${userData.collectionId}')"
-                                    class="flex-1 flex items-center justify-center px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors">
+                                    class="flex-1 flex items-center justify-center px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-all duration-200">
                                     <i class="fas fa-copy mr-2"></i>复制链接
                                 </button>
                                 <button onclick="showQRCode('clash', '${userData.collectionId}')"
-                                    class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors">
+                                    class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-all duration-200">
                                     <i class="fas fa-qrcode"></i>
                                 </button>
                             </div>

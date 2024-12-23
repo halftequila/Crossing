@@ -62,16 +62,14 @@ async function handleRequest(request, env, services) {
                 const sessionToken = auth.split(' ')[1];
                 const session = await services.user.verifySession(sessionToken, request);
                 if (session) {
-                    // 返回带用户信息的页面
                     return generateUserPage(env, 'secret', {
                         username: session.username,
                         collectionId: session.collectionId,
+                        expiry: session.expiry,
                         request: request
                     });
                 }
             }
-
-            // 没有有效认证时返回登录页
             return generateUserPage(env);
         } catch (error) {
             return ErrorHandler.handle(error, request);
