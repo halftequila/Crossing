@@ -50,16 +50,24 @@ export const CONFIG = {
             servers: [
                 {
                     tag: "dns_proxy",
-                    address: "tls://1.1.1.1"
+                    address: "tls://1.1.1.1",
+                    address_resolver: "dns_resolver"
                 },
                 {
                     tag: "dns_direct",
-                    address: "https://223.5.5.5/dns-query",
-                    detour: "direct"
+                    address: "h3://dns.alidns.com/dns-query",
+                    address_resolver: "dns_resolver",
+                    detour: "direct",
+                    strategy: "ipv4_only"
                 },
                 {
                     tag: "dns_fakeip",
                     address: "fakeip"
+                },
+                {
+                    tag: "dns_resolver",
+                    address: "223.5.5.5",
+                    detour: "direct"
                 },
                 {
                     tag: "block",
@@ -71,7 +79,7 @@ export const CONFIG = {
                     geosite: [
                         "category-ads-all"
                     ],
-                    server: "block",
+                    server: "dns_block",
                     disable_cache: true
                 },
                 {
@@ -86,12 +94,21 @@ export const CONFIG = {
                 },
                 {
                     geosite: [
-                        "cn"
+                        "geolocation-!cn"
                     ],
-                    server: "dns_direct"
+                    server: "dns_proxy"
+                },
+                {
+                    domain: [
+                        "cloudflare.com",
+                        "+.cloudflare.com",
+                        "workers.dev",
+                        "+.workers.dev"
+                    ],
+                    server: "dns_direct"  // Cloudflare 相关域名使用直连 DNS
                 }
             ],
-            final: "dns_proxy",
+            final: "dns_direct",  // 改回直连 DNS
             independent_cache: true,
             fakeip: {
                 enabled: true,
