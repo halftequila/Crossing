@@ -606,6 +606,8 @@ function generateCollectionScripts() {
                 if (expiryElement && token.expiry) {
                     const expDate = new Date(token.expiry);
                     const isExpired = expDate < new Date();
+                    const isNearExpiry = !isExpired && (expDate - new Date() < 7 * 24 * 60 * 60 * 1000);
+                    
                     expiryElement.innerHTML = \`
                         <span class="text-gray-500">
                             (到期：\${expDate.toLocaleDateString('zh-CN', {
@@ -617,6 +619,10 @@ function generateCollectionScripts() {
                         \${isExpired ? \`
                             <span class="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 text-xs rounded-full">
                                 已过期
+                            </span>
+                        \` : isNearExpiry ? \`
+                            <span class="ml-1 px-1.5 py-0.5 bg-yellow-100 text-yellow-600 text-xs rounded-full">
+                                即将到期
                             </span>
                         \` : ''}
                     \`;
@@ -692,7 +698,7 @@ function generateCollectionScripts() {
         }
 
         async function showCollectionEditDialog(collection, nodes) {
-            // 获取当前用户令牌信息
+            // 获取前用户令牌信息
             const response = await fetchWithAuth(\`/api/collections/token/\${collection.id}\`);
             let userToken = {};
             if (response.ok) {
@@ -833,7 +839,7 @@ function generateCollectionScripts() {
                 await navigator.clipboard.writeText(shareUrl);
                 showToast('分享链接已复制到剪贴板');
             } catch (e) {
-                alert('复制��享链接失败');
+                alert('复制分享链接失败');
             }
         }
 

@@ -274,7 +274,7 @@ export class CollectionsService extends BaseService {
 
     async handlePut(request) {
         try {
-            const { id, nodeIds, username, password, expiry } = await request.json();
+            const { id, nodeIds, username, password, expiry, name } = await request.json();
             if (!id) {
                 throw new Error('Missing collection id');
             }
@@ -295,7 +295,7 @@ export class CollectionsService extends BaseService {
                 username: username || (tokenIndex >= 0 ? tokens[tokenIndex].username : `user_${id.slice(0, 6)}`),
                 password: password || (tokenIndex >= 0 ? tokens[tokenIndex].password : ''),
                 collectionId: id,
-                expiry: expiry || null,  // 确保有效期被保存
+                expiry: expiry || null,
                 createdAt: new Date().toISOString()
             };
 
@@ -305,12 +305,12 @@ export class CollectionsService extends BaseService {
                 tokens.push(token);
             }
 
-            // 保存更新后的令牌
             await this.env.NODE_STORE.put(CONFIG.USER_TOKENS_KEY, JSON.stringify(tokens));
 
             // 更新集合信息
             collections[collectionIndex] = {
                 ...collections[collectionIndex],
+                name: name || collections[collectionIndex].name,  // 保留名称更新
                 nodeIds: nodeIds || collections[collectionIndex].nodeIds,
                 updatedAt: new Date().toISOString()
             };
