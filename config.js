@@ -138,8 +138,8 @@ export const CONFIG = {
                 tag: "tun-in",
                 inet4_address: "172.19.0.1/30",
                 auto_route: true,
-                strict_route: true,
-                stack: "mixed",
+                strict_route: false,
+                stack: "system",
                 sniff: true
             }
         ]
