@@ -517,77 +517,72 @@ function generateCollectionScripts() {
             try {
                 const response = await fetchWithAuth('/api/collections');
                 const collections = await response.json();
-                renderCollections(collections);
-            } catch (e) {
-                console.error('Error loading collections:', e);
-                alert('加载集合失败');
-            }
-        }
-
-        function renderCollections(collections) {
-            const collectionList = document.getElementById('collectionList');
-            collectionList.innerHTML = collections.map(collection => \`
-                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200">
-                    <div class="flex flex-col space-y-4">
-                        <!-- 集合标题、有效期和操作按钮 -->
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                                        <i class="fas fa-layer-group text-blue-500 mr-2"></i>
-                                        \${collection.name}
-                                    </h3>
-                                    <span id="expiry_\${collection.id}" class="text-sm text-gray-500">
-                                        <!-- 有效期将通过 updateCollectionNodes 函数更新 -->
-                                    </span>
+                console.log('Loaded collections:', collections);
+                
+                const collectionList = document.getElementById('collectionList');
+                collectionList.innerHTML = collections.map(collection => \`
+                    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200">
+                        <div class="flex flex-col space-y-4">
+                            <!-- 集合标题、有效期和操作按钮 -->
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                            <i class="fas fa-layer-group text-blue-500 mr-2"></i>
+                                            \${collection.name}
+                                        </h3>
+                                        <span id="expiry_\${collection.id}" class="text-sm text-gray-500"></span>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="editCollection('\${collection.id}')"
+                                        class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"
+                                        title="编辑集合">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteCollection('\${collection.id}')"
+                                        class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                                        title="删除集合">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="flex space-x-2">
-                                <button onclick="editCollection('\${collection.id}')"
-                                    class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"
-                                    title="编辑集合">
-                                    <i class="fas fa-edit"></i>
+
+                            <!-- 节点列表 -->
+                            <div id="nodeList_\${collection.id}" class="flex flex-wrap gap-2">
+                                <!-- 节点列表将通过 updateCollectionNodes 函数更新 -->
+                            </div>
+
+                            <!-- 操作按钮组 -->
+                            <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
+                                <button onclick="shareCollection('\${collection.id}')"
+                                    class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">
+                                    <i class="fas fa-share-alt mr-1.5"></i>分享
                                 </button>
-                                <button onclick="deleteCollection('\${collection.id}')"
-                                    class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
-                                    title="删除集合">
-                                    <i class="fas fa-trash"></i>
+                                <button onclick="universalSubscription('\${collection.id}')"
+                                    class="inline-flex items-center px-3 py-1.5 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 transition-colors">
+                                    <i class="fas fa-link mr-1.5"></i>通用订阅
+                                </button>
+                                <button onclick="singboxSubscription('\${collection.id}')"
+                                    class="inline-flex items-center px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors">
+                                    <i class="fas fa-box mr-1.5"></i>SingBox订阅
+                                </button>
+                                <button onclick="clashSubscription('\${collection.id}')"
+                                    class="inline-flex items-center px-3 py-1.5 bg-purple-500 text-white text-sm rounded-lg hover:bg-purple-600 transition-colors">
+                                    <i class="fas fa-bolt mr-1.5"></i>Clash订阅
                                 </button>
                             </div>
                         </div>
-
-                        <!-- 节点列表 -->
-                        <div id="nodeList_\${collection.id}" class="flex flex-wrap gap-2">
-                            <!-- 节点列表将通过 updateCollectionNodes 函数更新 -->
-                        </div>
-
-                        <!-- 操作按钮组 -->
-                        <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
-                            <button onclick="shareCollection('\${collection.id}')"
-                                class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">
-                                <i class="fas fa-share-alt mr-1.5"></i>分享
-                            </button>
-                            <button onclick="universalSubscription('\${collection.id}')"
-                                class="inline-flex items-center px-3 py-1.5 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 transition-colors">
-                                <i class="fas fa-link mr-1.5"></i>通用订阅
-                            </button>
-                            <button onclick="singboxSubscription('\${collection.id}')"
-                                class="inline-flex items-center px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors">
-                                <i class="fas fa-box mr-1.5"></i>SingBox订阅
-                            </button>
-                            <button onclick="clashSubscription('\${collection.id}')"
-                                class="inline-flex items-center px-3 py-1.5 bg-purple-500 text-white text-sm rounded-lg hover:bg-purple-600 transition-colors">
-                                <i class="fas fa-bolt mr-1.5"></i>Clash订阅
-                            </button>
-                        </div>
                     </div>
-                </div>
-            \`).join('');
+                \`).join('');
 
-            // 更新每个集合的节点列表和有效期
-            collections.forEach(collection => {
-                updateCollectionNodes(collection);
-            });
+                // 更新每个集合的节点列表和有效期
+                collections.forEach(collection => {
+                    updateCollectionNodes(collection);
+                });
+            } catch (e) {
+                console.error('Error loading collections:', e);
+            }
         }
 
         async function updateCollectionNodes(collection) {
@@ -782,13 +777,30 @@ function generateCollectionScripts() {
         }
 
         async function updateCollection(id) {
-            const username = document.getElementById('collectionUsername').value;
-            const password = document.getElementById('collectionPassword').value;
-            const expiry = document.getElementById('collectionExpiry').value;
-            const nodeIds = Array.from(document.querySelectorAll('.fixed input[type="checkbox"]:checked'))
+            // 获取编辑对话框中的所有输入值
+            const dialog = document.querySelector('.fixed');
+            if (!dialog) {
+                console.error('Dialog not found');
+                return;
+            }
+
+            const nameInput = dialog.querySelector('#collectionName');
+            if (!nameInput) {
+                console.error('Name input not found');
+                return;
+            }
+
+            const name = nameInput.value;
+            console.log('Input name value:', name); // 调试日志
+
+            const username = dialog.querySelector('#collectionUsername').value;
+            const password = dialog.querySelector('#collectionPassword').value;
+            const expiry = dialog.querySelector('#collectionExpiry').value;
+            const nodeIds = Array.from(dialog.querySelectorAll('input[type="checkbox"]:checked'))
                 .map(checkbox => checkbox.value);
             
             try {
+                console.log('Sending update with data:', { id, name, nodeIds, username, password, expiry }); // 调试日志
                 const response = await fetchWithAuth('/api/collections', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -797,12 +809,15 @@ function generateCollectionScripts() {
                         nodeIds, 
                         username, 
                         password,
-                        expiry: expiry || null  // 确保有效期被发送
+                        expiry: expiry || null,
+                        name
                     })
                 });
                 
                 if (response.ok) {
-                    document.querySelector('.fixed').remove();
+                    const updatedData = await response.json();
+                    console.log('Update successful:', updatedData); // 调试日志
+                    dialog.remove();
                     await loadCollections();
                 } else {
                     const error = await response.json();

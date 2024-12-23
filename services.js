@@ -275,9 +275,7 @@ export class CollectionsService extends BaseService {
     async handlePut(request) {
         try {
             const { id, nodeIds, username, password, expiry, name } = await request.json();
-            if (!id) {
-                throw new Error('Missing collection id');
-            }
+            console.log('Received update request with name:', name);  // 添加日志
 
             const collections = await this.getCollections();
             const collectionIndex = collections.findIndex(c => c.id === id);
@@ -310,20 +308,18 @@ export class CollectionsService extends BaseService {
             // 更新集合信息
             collections[collectionIndex] = {
                 ...collections[collectionIndex],
-                name: name || collections[collectionIndex].name,  // 保留名称更新
+                name: name || collections[collectionIndex].name,  // 更新名称
                 nodeIds: nodeIds || collections[collectionIndex].nodeIds,
                 updatedAt: new Date().toISOString()
             };
 
             await this.setCollections(collections);
-            return new Response(JSON.stringify(collections[collectionIndex]), {
-                headers: { 'Content-Type': 'application/json' }
-            });
+            console.log('Updated collection:', collections[collectionIndex]);  // 添加日志
+            
+            return new Response(JSON.stringify(collections[collectionIndex]));
         } catch (e) {
-            return new Response(JSON.stringify({ error: e.message }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' }
-            });
+            console.error('Update error:', e);  // 添加错误日志
+            return new Response(JSON.stringify({ error: e.message }), { status: 400 });
         }
     }
 
@@ -658,7 +654,7 @@ export class UserService extends BaseService {
         try {
             const { username, password } = await request.json();
 
-            // 获取浏览器特信息
+            // 获浏览器特信息
             const browserInfo = {
                 userAgent: request.headers.get('User-Agent'),
                 ip: request.headers.get('CF-Connecting-IP'),
