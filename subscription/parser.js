@@ -427,7 +427,9 @@ export default class Parser {
                 
                 // 解码用户信息
                 const decodedUserInfo = atob(userInfo);
-                const [method, password] = decodedUserInfo.split(':');
+                // 处理可能包含多个冒号分隔的密码部分
+                const [method, ...passwordParts] = decodedUserInfo.split(':');
+                const password = passwordParts.join(':'); // 重新组合密码部分
                 
                 return {
                     type: 'ss',
