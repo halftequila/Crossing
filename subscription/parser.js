@@ -50,6 +50,14 @@ function decodeNodeName(encodedName, fallback = 'Unnamed') {
     }
 }
 
+const config = {
+  proxy: {
+    http: "http://127.0.0.1:8080",
+    https: "http://127.0.0.1:8080",
+    socks: "socks5://127.0.0.1:1080"
+  }
+};
+
 export default class Parser {
     /**
      * 解析订阅内容
@@ -121,7 +129,7 @@ export default class Parser {
             // 尝试 Base64 解码
             let decodedContent = this.tryBase64Decode(content);
             
-            // 分割成行
+            // 分割行
             const lines = decodedContent.split(/[\n\s]+/).filter(line => line.trim());
 
             let nodes = [];
@@ -382,20 +390,56 @@ export default class Parser {
      */
     static parseSS(line) {
         try {
-            const content = line.slice(5); // 移除 "ss://"
-            const [userinfo, serverInfo] = content.split('@');
-            const [method, password] = atob(userinfo).split(':');
-            const [server, port] = serverInfo.split(':');
-            return {
-                type: 'ss',
-                name: decodeNodeName(serverInfo || 'Unnamed'),
-                server,
-                port: parseInt(port),
-                settings: {
-                    method,
-                    password
-                }
-            };
+            // 移除 "ss://" 前缀
+            let content = line.slice(5);
+            
+            // 分离名称部分（如果存在）
+            let name = '';
+            const hashIndex = content.lastIndexOf('#');
+            if (hashIndex !== -1) {
+                name = content.slice(hashIndex + 1);
+                content = content.slice(0, hashIndex);
+            }
+
+            // 检查是否是新版格式（已经 base64 编码的用户信息）
+            const atIndex = content.indexOf('@');
+            if (atIndex === -1) {
+                // 旧版格式，整个内容都是 base64 编码
+                const decoded = atob(content);
+                const [methodAndPass, serverAndPort] = decoded.split('@');
+                const [method, password] = methodAndPass.split(':');
+                const [server, port] = serverAndPort.split(':');
+                
+                return {
+                    type: 'ss',
+                    name: decodeNodeName(name),
+                    server,
+                    port: parseInt(port),
+                    settings: {
+                        method,
+                        password
+                    }
+                };
+            } else {
+                // 新版格式，只有用户信息是 base64 编码
+                const [userInfo, serverInfo] = content.split('@');
+                const [server, port] = serverInfo.split(':');
+                
+                // 解码用户信息
+                const decodedUserInfo = atob(userInfo);
+                const [method, password] = decodedUserInfo.split(':');
+                
+                return {
+                    type: 'ss',
+                    name: decodeNodeName(name),
+                    server,
+                    port: parseInt(port),
+                    settings: {
+                        method,
+                        password
+                    }
+                };
+            }
         } catch (error) {
             console.error('Parse Shadowsocks error:', error);
             return null;
