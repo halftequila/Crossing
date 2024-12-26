@@ -390,6 +390,12 @@ export default class Parser {
      */
     static parseSS(line) {
         try {
+            console.log('Parsing node:', {
+                protocol: 'ss',
+                length: line.length,
+                sample: line.slice(0, 50) + '...'
+            });
+
             // 移除 "ss://" 前缀
             let content = line.slice(5);
             
@@ -406,9 +412,9 @@ export default class Parser {
             if (atIndex === -1) {
                 // 旧版格式，整个内容都是 base64 编码
                 const decoded = atob(content);
-                const [methodAndPass, serverAndPort] = decoded.split('@');
+                const [methodAndPass, serverInfo] = decoded.split('@');
                 const [method, password] = methodAndPass.split(':');
-                const [server, port] = serverAndPort.split(':');
+                const [server, port] = serverInfo.split(':');
                 
                 return {
                     type: 'ss',
@@ -423,13 +429,16 @@ export default class Parser {
             } else {
                 // 新版格式，只有用户信息是 base64 编码
                 const [userInfo, serverInfo] = content.split('@');
-                const [server, port] = serverInfo.split(':');
+                console.log('Processing userInfo:', userInfo);
                 
                 // 解码用户信息
                 const decodedUserInfo = atob(userInfo);
-                // 处理可能包含多个冒号分隔的密码部分
+                console.log('Decoded userInfo:', decodedUserInfo);
+                
                 const [method, ...passwordParts] = decodedUserInfo.split(':');
-                const password = passwordParts.join(':'); // 重新组合密码部分
+                const encodedPassword = passwordParts.join(':');
+                
+                const [server, port] = serverInfo.split(':');
                 
                 return {
                     type: 'ss',
@@ -438,7 +447,7 @@ export default class Parser {
                     port: parseInt(port),
                     settings: {
                         method,
-                        password
+                        password: encodedPassword  // 保持原始编码格式
                     }
                 };
             }
