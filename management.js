@@ -1,6 +1,6 @@
 import { CONFIG, getConfig } from './config.js';
 
-// 管理页面生成
+// Generate management page with Bauhaus design principles
 export function generateManagementPage(env, CONFIG) {
     const html = `
         <!DOCTYPE html>
@@ -8,7 +8,7 @@ export function generateManagementPage(env, CONFIG) {
         <head>
             ${generateHead()}
         </head>
-        <body class="bg-gray-100 min-h-screen">
+        <body class="bg-white min-h-screen">
             ${generateHeader(CONFIG, env)}
             ${generateMainContent(CONFIG)}
             ${generateScripts(env, CONFIG)}
@@ -21,15 +21,98 @@ export function generateManagementPage(env, CONFIG) {
     });
 }
 
-// 生成头部
+// Generate head with Bauhaus-inspired styles
 function generateHead() {
     return `
         <title>节点管理系统</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://unpkg.com/tailwindcss@2/dist/tailwind.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --bauhaus-red: #E53935;
+                --bauhaus-blue: #1E88E5;
+                --bauhaus-yellow: #FDD835;
+                --bauhaus-black: #212121;
+            }
+            
+            body {
+                font-family: 'Inter', sans-serif;
+                color: var(--bauhaus-black);
+            }
+            
+            .bauhaus-grid {
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                gap: 24px;
+            }
+            
+            .bauhaus-red { background-color: var(--bauhaus-red); }
+            .bauhaus-blue { background-color: var(--bauhaus-blue); }
+            .bauhaus-yellow { background-color: var(--bauhaus-yellow); }
+            
+            .bauhaus-text-red { color: var(--bauhaus-red); }
+            .bauhaus-text-blue { color: var(--bauhaus-blue); }
+            .bauhaus-text-yellow { color: var(--bauhaus-yellow); }
+            
+            .bauhaus-border-red { border-color: var(--bauhaus-red); }
+            .bauhaus-border-blue { border-color: var(--bauhaus-blue); }
+            .bauhaus-border-yellow { border-color: var(--bauhaus-yellow); }
+            
+            .bauhaus-btn {
+                border: none;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                transition: transform 0.2s;
+            }
+            
+            .bauhaus-btn:hover {
+                transform: translateY(-2px);
+            }
+            
+            .bauhaus-card {
+                border: 2px solid var(--bauhaus-black);
+                box-shadow: 8px 8px 0 var(--bauhaus-black);
+                transition: all 0.2s;
+            }
+            
+            .bauhaus-card:hover {
+                box-shadow: 6px 6px 0 var(--bauhaus-black);
+                transform: translate(2px, 2px);
+            }
+            
+            .bauhaus-input {
+                border: 2px solid var(--bauhaus-black);
+                font-size: 1rem;
+                outline: none;
+            }
+            
+            .bauhaus-input:focus {
+                border-color: var(--bauhaus-blue);
+            }
+            
+            .bauhaus-circle {
+                border-radius: 50%;
+                display: inline-block;
+            }
+            
+            .bauhaus-square {
+                display: inline-block;
+            }
+            
+            .bauhaus-triangle {
+                width: 0;
+                height: 0;
+                border-left: 8px solid transparent;
+                border-right: 8px solid transparent;
+                border-bottom: 16px solid currentColor;
+                display: inline-block;
+            }
+        </style>
         <script>
-            // 保存认证信息到 localStorage 和 sessionStorage
+            // Auth functions remain the same
             function saveAuth(username, password) {
                 const auth = btoa(username + ':' + password);
                 try {
@@ -41,12 +124,10 @@ function generateHead() {
                 return auth;
             }
 
-            // 获取认证信息，优先从 sessionStorage 获取
             function getAuth() {
                 return sessionStorage.getItem('auth') || localStorage.getItem('auth');
             }
 
-            // 清除所有认证信息
             function clearAuth() {
                 try {
                     localStorage.removeItem('auth');
@@ -56,26 +137,25 @@ function generateHead() {
                 sessionStorage.removeItem('auth');
             }
 
-            // 显示登录对话框
             function showLoginDialog() {
                 const dialog = document.createElement('div');
-                dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                dialog.className = 'fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
                 dialog.innerHTML = \`
-                    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-                        <h2 class="text-xl font-bold mb-4">管理员登录</h2>
-                        <div class="space-y-4">
+                    <div class="bg-white p-8 w-full max-w-md bauhaus-card">
+                        <h2 class="text-2xl font-bold mb-8 uppercase tracking-wider">管理员登录</h2>
+                        <div class="space-y-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">用户名</label>
+                                <label class="block text-sm font-medium uppercase mb-2">用户名</label>
                                 <input type="text" id="username" 
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    class="bauhaus-input w-full px-4 py-3">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">密码</label>
+                                <label class="block text-sm font-medium uppercase mb-2">密码</label>
                                 <input type="password" id="password" 
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    class="bauhaus-input w-full px-4 py-3">
                             </div>
                             <button onclick="login()"
-                                class="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                class="w-full py-3 mt-4 bauhaus-btn bauhaus-blue text-white">
                                 登录
                             </button>
                         </div>
@@ -97,38 +177,32 @@ function generateHead() {
     `;
 }
 
-// 生成页面头部
+// Generate header with Bauhaus design
 function generateHeader(CONFIG, env) {
     return `
-        <header class="bg-white shadow-lg rounded-xl mb-8 backdrop-blur-lg bg-opacity-90">
-            <div class="max-w-7xl mx-auto py-6 px-6 sm:px-8">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center">
-                        <i class="fas fa-server text-blue-500 text-3xl mr-3"></i>
+        <header class="border-b-4 border-black py-6 px-8 mb-12">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex items-center mb-6 md:mb-0">
+                        <div class="bauhaus-circle w-12 h-12 mr-4 bauhaus-red"></div>
                         <div>
-                            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
-                                节点管理系统
-                            </h1>
-                            <p class="text-sm text-gray-500 mt-1">Node Management System</p>
+                            <h1 class="text-4xl font-bold uppercase tracking-wider">节点管理系统</h1>
+                            <div class="w-32 h-2 bauhaus-blue mt-2"></div>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex space-x-2">
-                            <button onclick="openUserLogin()"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-yellow-500 hover:bg-yellow-600 transition-all duration-200">
-                                <i class="fas fa-user text-white mr-2"></i>用户登录
-                            </button>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button onclick="openSubscriber()"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition-all duration-200">
-                                <i class="fas fa-list text-white mr-2"></i>自选订阅器
-                            </button>
-                            <button onclick="openQuickSubscriber()"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600 transition-all duration-200">
-                                <i class="fas fa-bolt text-white mr-2"></i>快速订阅器
-                            </button>
-                        </div>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button onclick="openUserLogin()"
+                            class="px-6 py-3 bauhaus-btn bauhaus-yellow text-black">
+                            用户登录
+                        </button>
+                        <button onclick="openSubscriber()"
+                            class="px-6 py-3 bauhaus-btn bauhaus-blue text-white">
+                            自选订阅器
+                        </button>
+                        <button onclick="openQuickSubscriber()"
+                            class="px-6 py-3 bauhaus-btn bauhaus-red text-white">
+                            快速订阅器
+                        </button>
                     </div>
                 </div>
             </div>
@@ -136,13 +210,15 @@ function generateHeader(CONFIG, env) {
     `;
 }
 
-// 生成主要内容
+// Generate main content with Bauhaus grid
 function generateMainContent(CONFIG) {
     return `
-        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <div class="px-4 sm:px-0">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <main class="max-w-7xl mx-auto px-8 pb-16">
+            <div class="bauhaus-grid">
+                <div class="col-span-12 md:col-span-6 mb-10">
                     ${generateNodeManager()}
+                </div>
+                <div class="col-span-12 md:col-span-6 mb-10">
                     ${generateCollectionManager(CONFIG)}
                 </div>
             </div>
@@ -150,24 +226,25 @@ function generateMainContent(CONFIG) {
     `;
 }
 
-// 生成节点管理部分
+// Generate node manager with Bauhaus style
 function generateNodeManager() {
     return `
-        <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-all duration-300">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <i class="fas fa-network-wired text-blue-500 mr-3"></i>节点管理
+        <div class="p-8 bauhaus-card bg-white mb-6">
+            <h2 class="text-2xl font-bold uppercase mb-8 flex items-center">
+                <div class="bauhaus-square w-6 h-6 bauhaus-blue mr-3"></div>
+                节点管理
             </h2>
-            <div class="space-y-6">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <div class="flex-1 flex flex-col md:flex-row gap-4">
+            <div class="space-y-8">
+                <div class="flex flex-col gap-4">
+                    <div class="flex flex-col md:flex-row gap-4">
                         <input type="text" id="nodeName" placeholder="节点名称"
-                            class="w-full md:w-1/3 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            class="bauhaus-input w-full md:w-1/3 px-4 py-3">
                         <input type="text" id="nodeUrl" placeholder="节点URL"
-                            class="w-full md:w-2/3 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                            class="bauhaus-input w-full md:w-2/3 px-4 py-3">
                     </div>
                     <button onclick="addNode()"
-                        class="whitespace-nowrap px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg">
-                        <i class="fas fa-plus mr-2"></i>添加节点
+                        class="self-end px-6 py-3 bauhaus-btn bauhaus-red text-white uppercase">
+                        添加节点
                     </button>
                 </div>
                 <div id="nodeList" class="space-y-4"></div>
@@ -176,46 +253,45 @@ function generateNodeManager() {
     `;
 }
 
-// 生成集合管理部分
+// Generate collection manager with Bauhaus style
 function generateCollectionManager(CONFIG) {
     return `
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">集合管理</h2>
+        <div class="p-8 bauhaus-card bg-white mb-6">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold uppercase flex items-center">
+                    <div class="bauhaus-circle w-6 h-6 bauhaus-red mr-3"></div>
+                    集合管理
+                </h2>
                 <a href="${CONFIG.DEFAULT_TEMPLATE_URL}" 
                     target="_blank"
-                    class="text-sm text-gray-500 hover:text-gray-700 flex items-center">
-                    <span>查看默认订阅配置</span>
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                    </svg>
+                    class="text-sm underline font-medium">
+                    查看默认配置
                 </a>
             </div>
-            <div class="space-y-4">
-                <div class="flex flex-col md:flex-row gap-4">
+            <div class="space-y-6">
+                <div class="flex flex-col gap-4">
                     <input type="text" id="collectionName" placeholder="集合名称"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        class="bauhaus-input w-full px-4 py-3">
                     <button onclick="addCollection()"
-                        class="whitespace-nowrap px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200">
+                        class="self-end px-6 py-3 bauhaus-btn bauhaus-blue text-white uppercase">
                         创建集合
                     </button>
                 </div>
-                <div class="space-y-2">
-                    <h3 class="text-lg font-semibold text-gray-700">选择节点</h3>
-                    <div id="nodeSelection" class="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg"></div>
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold uppercase">选择节点</h3>
+                    <div id="nodeSelection" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-2 border-black"></div>
                 </div>
-                <div id="collectionList" class="space-y-4"></div>
+                <div id="collectionList" class="space-y-6"></div>
             </div>
         </div>
     `;
 }
 
-// 生成脚本部分
+// Generate scripts with Bauhaus-compatible rendering
 function generateScripts(env, CONFIG) {
     return `
         <script>
-            // 配置常量，直接使用 getConfig 处理的值
+            // Configuration
             const CONFIG = {
                 SUB_WORKER_URL: '${getConfig('SUB_WORKER_URL', env)}',
                 TEMPLATE_URL: '${getConfig('DEFAULT_TEMPLATE_URL', env)}',
@@ -224,7 +300,7 @@ function generateScripts(env, CONFIG) {
                 API: ${JSON.stringify(CONFIG.API)}
             };
 
-            // 简化的 fetchWithAuth 函数
+            // Auth fetch helper
             async function fetchWithAuth(url, options = {}) {
                 const response = await fetch(url, options);
                 if (response.status === 401) {
@@ -234,16 +310,24 @@ function generateScripts(env, CONFIG) {
                 return response;
             }
 
-            // 初始化函数
+            // Initialize application
             async function init() {
                 try {
+                    // Add Font Awesome for icons
+                    if (!document.querySelector('link[href*="font-awesome"]')) {
+                        const link = document.createElement('link');
+                        link.rel = 'stylesheet';
+                        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+                        document.head.appendChild(link);
+                    }
+
                     await Promise.all([loadNodes(), loadCollections()]);
                 } catch (e) {
                     console.error('Failed to load data:', e);
                 }
             }
 
-            // 启动初始化
+            // Start initialization
             init();
 
             ${generateNodeScripts()}
@@ -253,7 +337,7 @@ function generateScripts(env, CONFIG) {
     `;
 }
 
-// 生成节点相关脚本
+// Generate node scripts with Bauhaus styling
 function generateNodeScripts() {
     return `
         async function loadNodes() {
@@ -266,37 +350,37 @@ function generateNodeScripts() {
                 }
             } catch (e) {
                 console.error('Error loading nodes:', e);
-                alert('加载节点失败');
+                showToast('加载节点失败', 'bauhaus-red');
             }
         }
 
         function renderNodes(nodes) {
             const nodeList = document.getElementById('nodeList');
             nodeList.innerHTML = nodes.map(node => \`
-                <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                <div class="p-5 border-2 border-black hover:border-blue-500 transition-colors duration-200">
                     <div class="flex justify-between items-center">
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-medium text-gray-800 flex items-center mb-1">
-                                <i class="fas fa-network-wired text-blue-500 mr-2"></i>
+                            <h3 class="font-bold uppercase mb-2 flex items-center">
+                                <div class="w-3 h-3 bauhaus-blue mr-2"></div>
                                 \${node.name}
                             </h3>
-                            <div class="text-sm text-gray-500 font-mono truncate">
+                            <div class="text-sm truncate font-mono">
                                 \${node.url}
                             </div>
                         </div>
-                        <div class="flex items-center space-x-2 ml-4">
+                        <div class="flex items-center space-x-3 ml-4">
                             <button onclick="editNode('\${node.id}')"
-                                class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"
+                                class="p-1.5 hover:text-blue-500 transition-colors"
                                 title="编辑节点">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button onclick="copyNode('\${node.id}')"
-                                class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"
+                                class="p-1.5 hover:text-blue-500 transition-colors"
                                 title="复制链接">
                                 <i class="fas fa-copy"></i>
                             </button>
                             <button onclick="deleteNode('\${node.id}')"
-                                class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                                class="p-1.5 hover:text-red-500 transition-colors"
                                 title="删除节点">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
@@ -304,14 +388,6 @@ function generateNodeScripts() {
                     </div>
                 </div>
             \`).join('');
-
-            // 添加 Font Awesome 图标库
-            if (!document.querySelector('link[href*="font-awesome"]')) {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
-                document.head.appendChild(link);
-            }
         }
 
         async function addNode() {
@@ -319,7 +395,7 @@ function generateNodeScripts() {
             const url = document.getElementById('nodeUrl').value;
             
             if (!name || !url) {
-                alert('请填写完整信息');
+                showToast('请填写完整信息', 'bauhaus-red');
                 return;
             }
             
@@ -334,9 +410,10 @@ function generateNodeScripts() {
                     document.getElementById('nodeName').value = '';
                     document.getElementById('nodeUrl').value = '';
                     await loadNodes();
+                    showToast('添加成功', 'bauhaus-blue');
                 }
             } catch (e) {
-                alert('添加节点失败');
+                showToast('添加节点失败', 'bauhaus-red');
             }
         }
 
@@ -350,43 +427,41 @@ function generateNodeScripts() {
                     showEditDialog(node);
                 }
             } catch (e) {
-                alert('编辑节点失败');
+                showToast('编辑节点失败', 'bauhaus-red');
             }
         }
 
         function showEditDialog(node) {
             const dialog = document.createElement('div');
-            dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
             dialog.innerHTML = \`
-                <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800">编辑节点</h3>
+                <div class="bg-white p-8 w-full max-w-lg mx-4 bauhaus-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold uppercase">编辑节点</h3>
                         <button onclick="this.closest('.fixed').remove()" 
-                            class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
+                            class="text-black hover:text-red-500">
+                            <i class="fas fa-times text-xl"></i>
                         </button>
                     </div>
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">节点名称</label>
+                            <label class="block text-sm font-bold uppercase mb-2">节点名称</label>
                             <input type="text" id="editNodeName" value="\${node.name}"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="bauhaus-input w-full px-4 py-3">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">节点URL</label>
+                            <label class="block text-sm font-bold uppercase mb-2">节点URL</label>
                             <input type="text" id="editNodeUrl" value="\${node.url}"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="bauhaus-input w-full px-4 py-3">
                         </div>
                     </div>
-                    <div class="flex justify-end space-x-3 mt-6">
+                    <div class="flex justify-end space-x-4 mt-8">
                         <button onclick="this.closest('.fixed').remove()"
-                            class="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
+                            class="px-6 py-3 border-2 border-black hover:bg-black hover:text-white transition-colors">
                             取消
                         </button>
                         <button onclick="updateNode('\${node.id}')"
-                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">
+                            class="px-6 py-3 bauhaus-btn bauhaus-blue text-white">
                             保存
                         </button>
                     </div>
@@ -400,7 +475,7 @@ function generateNodeScripts() {
             const url = document.getElementById('editNodeUrl').value;
             
             if (!name || !url) {
-                alert('请填写完整信息');
+                showToast('请填写完整信息', 'bauhaus-red');
                 return;
             }
             
@@ -414,9 +489,10 @@ function generateNodeScripts() {
                 if (response.ok) {
                     document.querySelector('.fixed').remove();
                     await loadNodes();
+                    showToast('更新成功', 'bauhaus-blue');
                 }
             } catch (e) {
-                alert('更新节点失败');
+                showToast('更新节点失败', 'bauhaus-red');
             }
         }
 
@@ -428,10 +504,10 @@ function generateNodeScripts() {
                 
                 if (node) {
                     await navigator.clipboard.writeText(node.url);
-                    showToast('已复制到剪贴板');
+                    showToast('已复制到剪贴板', 'bauhaus-blue');
                 }
             } catch (e) {
-                alert('复制失败');
+                showToast('复制失败', 'bauhaus-red');
             }
         }
 
@@ -447,60 +523,62 @@ function generateNodeScripts() {
                 
                 if (response.ok) {
                     await loadNodes();
+                    showToast('删除成功', 'bauhaus-yellow');
                 }
             } catch (e) {
-                alert('删除节点失败');
+                showToast('删除节点失败', 'bauhaus-red');
             }
         }
 
-        // 更新节点选择区域
+        // Update node selection area with Bauhaus style
         function updateNodeSelection(nodes) {
             const nodeSelection = document.getElementById('nodeSelection');
-            nodeSelection.innerHTML = nodes.map(node => \`
-                <div class="flex items-center space-x-3 p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-200">
-                    <input type="checkbox" id="select_\${node.id}" value="\${node.id}"
-                        class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                    <label for="select_\${node.id}" class="flex-1 text-sm text-gray-700 cursor-pointer">
-                        \${node.name}
-                    </label>
-                </div>
-            \`).join('');
-
-            // 添加全选/取消全选按钮
+            
+            // Add selection controls
             const selectionControls = document.createElement('div');
-            selectionControls.className = 'col-span-2 md:col-span-3 flex justify-end gap-2';
+            selectionControls.className = 'col-span-1 md:col-span-2 flex justify-end gap-3 mb-3';
             selectionControls.innerHTML = \`
                 <button onclick="selectAllNodes()"
-                    class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors duration-200">
+                    class="px-4 py-2 border-2 border-black hover:bg-black hover:text-white transition-colors text-sm uppercase">
                     全选
                 </button>
                 <button onclick="deselectAllNodes()"
-                    class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors duration-200">
+                    class="px-4 py-2 border-2 border-black hover:bg-black hover:text-white transition-colors text-sm uppercase">
                     取消全选
                 </button>
             \`;
+            
+            // Generate nodes checkboxes with Bauhaus style
+            nodeSelection.innerHTML = nodes.map(node => \`
+                <label class="flex items-center p-3 border-2 border-black hover:border-blue-500 transition-colors cursor-pointer">
+                    <input type="checkbox" id="select_\${node.id}" value="\${node.id}"
+                        class="mr-3 w-5 h-5 accent-blue-500">
+                    <span class="text-sm uppercase font-medium">\${node.name}</span>
+                </label>
+            \`).join('');
+            
             nodeSelection.insertBefore(selectionControls, nodeSelection.firstChild);
         }
 
-        // 全选节点
+        // Select all nodes
         function selectAllNodes() {
             document.querySelectorAll('#nodeSelection input[type="checkbox"]')
                 .forEach(checkbox => checkbox.checked = true);
         }
 
-        // 取消全选节点
+        // Deselect all nodes
         function deselectAllNodes() {
             document.querySelectorAll('#nodeSelection input[type="checkbox"]')
                 .forEach(checkbox => checkbox.checked = false);
         }
 
-        // 获取选中的节点ID列表
+        // Get selected node IDs
         function getSelectedNodeIds() {
             return Array.from(document.querySelectorAll('#nodeSelection input:checked'))
                 .map(checkbox => checkbox.value);
         }
 
-        // 设置节点选中状态
+        // Set node selection
         function setNodeSelection(nodeIds) {
             document.querySelectorAll('#nodeSelection input[type="checkbox"]')
                 .forEach(checkbox => {
@@ -510,78 +588,76 @@ function generateNodeScripts() {
     `;
 }
 
-// 生成集合相关脚本
+// Generate collection scripts with Bauhaus styling
 function generateCollectionScripts() {
     return `
         async function loadCollections() {
             try {
                 const response = await fetchWithAuth('/api/collections');
                 const collections = await response.json();
-                console.log('Loaded collections:', collections);
                 
                 const collectionList = document.getElementById('collectionList');
                 collectionList.innerHTML = collections.map(collection => \`
-                    <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200">
+                    <div class="p-6 border-2 border-black hover:border-blue-500 transition-colors">
                         <div class="flex flex-col space-y-4">
-                            <!-- 集合标题、有效期和操作按钮 -->
+                            <!-- Collection header -->
                             <div class="flex justify-between items-start">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2">
-                                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                                            <i class="fas fa-layer-group text-blue-500 mr-2"></i>
+                                        <h3 class="text-lg font-bold uppercase flex items-center">
+                                            <div class="bauhaus-circle w-3 h-3 bauhaus-yellow mr-2"></div>
                                             \${collection.name}
                                         </h3>
-                                        <span id="expiry_\${collection.id}" class="text-sm text-gray-500"></span>
+                                        <span id="expiry_\${collection.id}" class="text-sm"></span>
                                     </div>
                                 </div>
-                                <div class="flex space-x-2">
+                                <div class="flex space-x-3">
                                     <button onclick="editCollection('\${collection.id}')"
-                                        class="p-1.5 text-gray-400 hover:text-blue-500 transition-colors"
+                                        class="p-1.5 hover:text-blue-500 transition-colors"
                                         title="编辑集合">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button onclick="deleteCollection('\${collection.id}')"
-                                        class="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                                        class="p-1.5 hover:text-red-500 transition-colors"
                                         title="删除集合">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- 节点列表 -->
-                            <div id="nodeList_\${collection.id}" class="flex flex-wrap gap-2">
-                                <!-- 节点列表将通过 updateCollectionNodes 函数更新 -->
-                            </div>
+                            <!-- Node list -->
+                            <div id="nodeList_\${collection.id}" class="flex flex-wrap gap-2 py-3"></div>
 
-                            <!-- 操作按钮组 -->
-                            <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
+                            <!-- Action buttons -->
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t-2 border-black">
                                 <button onclick="shareCollection('\${collection.id}')"
-                                    class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">
-                                    <i class="fas fa-share-alt mr-1.5"></i>分享
+                                    class="py-2 px-3 bauhaus-yellow text-black text-sm uppercase">
+                                    分享
                                 </button>
                                 <button onclick="universalSubscription('\${collection.id}')"
-                                    class="inline-flex items-center px-3 py-1.5 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 transition-colors">
-                                    <i class="fas fa-link mr-1.5"></i>通用订阅
+                                    class="py-2 px-3 bauhaus-blue text-white text-sm uppercase">
+                                    通用订阅
                                 </button>
                                 <button onclick="singboxSubscription('\${collection.id}')"
-                                    class="inline-flex items-center px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors">
-                                    <i class="fas fa-box mr-1.5"></i>SingBox订阅
+                                    class="py-2 px-3 bauhaus-red text-white text-sm uppercase">
+                                    SingBox
                                 </button>
                                 <button onclick="clashSubscription('\${collection.id}')"
-                                    class="inline-flex items-center px-3 py-1.5 bg-purple-500 text-white text-sm rounded-lg hover:bg-purple-600 transition-colors">
-                                    <i class="fas fa-bolt mr-1.5"></i>Clash订阅
+                                    class="py-2 px-3 bg-black text-white text-sm uppercase">
+                                    Clash
                                 </button>
                             </div>
                         </div>
                     </div>
                 \`).join('');
 
-                // 更新每个集合的节点列表和有效期
+                // Update each collection's nodes and expiry
                 collections.forEach(collection => {
                     updateCollectionNodes(collection);
                 });
             } catch (e) {
                 console.error('Error loading collections:', e);
+                showToast('加载集合失败', 'bauhaus-red');
             }
         }
 
@@ -596,41 +672,43 @@ function generateCollectionScripts() {
                 const token = await tokenResponse.json();
                 const collectionNodes = nodes.filter(node => collection.nodeIds.includes(node.id));
                 
-                // 更新有效期显示
+                // Update expiry display with Bauhaus styling
                 const expiryElement = document.getElementById(\`expiry_\${collection.id}\`);
                 if (expiryElement && token.expiry) {
                     const expDate = new Date(token.expiry);
                     const isExpired = expDate < new Date();
                     const isNearExpiry = !isExpired && (expDate - new Date() < 7 * 24 * 60 * 60 * 1000);
                     
+                    const dateStr = expDate.toLocaleDateString('zh-CN', {
+                        year: 'numeric',
+                        month: 'numeric',
+                        day: 'numeric'
+                    });
+                    
                     expiryElement.innerHTML = \`
-                        <span class="text-gray-500">
-                            (到期：\${expDate.toLocaleDateString('zh-CN', {
-                                year: 'numeric',
-                                month: 'numeric',
-                                day: 'numeric'
-                            })})
+                        <span>
+                            (\${dateStr})
                         </span>
                         \${isExpired ? \`
-                            <span class="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 text-xs rounded-full">
+                            <span class="ml-1 px-2 py-0.5 bauhaus-red text-white text-xs uppercase">
                                 已过期
                             </span>
                         \` : isNearExpiry ? \`
-                            <span class="ml-1 px-1.5 py-0.5 bg-yellow-100 text-yellow-600 text-xs rounded-full">
+                            <span class="ml-1 px-2 py-0.5 bauhaus-yellow text-black text-xs uppercase">
                                 即将到期
                             </span>
                         \` : ''}
                     \`;
                 }
                 
-                // 更新节点列表，使用更简洁的样式
+                // Update node list with Bauhaus styling
                 const nodeList = document.getElementById(\`nodeList_\${collection.id}\`);
                 if (nodeList) {
                     nodeList.innerHTML = collectionNodes.map(node => \`
-                        <span class="inline-flex items-center px-3 py-1 bg-gray-50 text-gray-700 text-sm rounded-lg">
-                            <span class="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
+                        <div class="px-3 py-2 border-2 border-black text-sm uppercase">
+                            <div class="w-2 h-2 bauhaus-red inline-block mr-2"></div>
                             \${node.name}
-                        </span>
+                        </div>
                     \`).join('');
                 }
             } catch (e) {
@@ -644,12 +722,12 @@ function generateCollectionScripts() {
                 .map(checkbox => checkbox.value);
             
             if (!name) {
-                alert('请输入集合名称');
+                showToast('请输入集合名称', 'bauhaus-red');
                 return;
             }
             
             if (nodeIds.length === 0) {
-                alert('请选择至少一个节点');
+                showToast('请选择至少一个节点', 'bauhaus-red');
                 return;
             }
             
@@ -666,9 +744,10 @@ function generateCollectionScripts() {
                         checkbox => checkbox.checked = false
                     );
                     await loadCollections();
+                    showToast('创建集合成功', 'bauhaus-blue');
                 }
             } catch (e) {
-                alert('创建集合失败');
+                showToast('创建集合失败', 'bauhaus-red');
             }
         }
 
@@ -688,19 +767,19 @@ function generateCollectionScripts() {
                 }
             } catch (e) {
                 console.error('编辑集合失败:', e);
-                alert('编辑集合失败');
+                showToast('编辑集合失败', 'bauhaus-red');
             }
         }
 
         async function showCollectionEditDialog(collection, nodes) {
-            // 获取前用户令牌信息
+            // Get user token info
             const response = await fetchWithAuth(\`/api/collections/token/\${collection.id}\`);
             let userToken = {};
             if (response.ok) {
                 userToken = await response.json();
             }
 
-            // 格式化日期为 YYYY-MM-DD 格式
+            // Format date for input
             const formatDateForInput = (dateString) => {
                 if (!dateString) return '';
                 const date = new Date(dateString);
@@ -708,66 +787,75 @@ function generateCollectionScripts() {
             };
 
             const dialog = document.createElement('div');
-            dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center';
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50';
             dialog.innerHTML = \`
-                <div class="bg-white rounded-lg p-6 w-full max-w-2xl space-y-4">
-                    <h2 class="text-xl font-bold text-gray-900">编辑集合</h2>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">集合名称</label>
-                        <input type="text" id="collectionName" value="\${collection.name}"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-8 w-full max-w-2xl bauhaus-card overflow-y-auto max-h-[90vh]">
+                    <h2 class="text-xl font-bold uppercase mb-6 flex items-center">
+                        <div class="bauhaus-circle w-4 h-4 bauhaus-red mr-3"></div>
+                        编辑集合
+                    </h2>
+                    <div class="space-y-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">访问用户名</label>
-                            <input type="text" id="collectionUsername" value="\${userToken.username || ''}"
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <p class="mt-1 text-sm text-gray-500">留空将自动生成用户名</p>
-                            \${userToken.username ? \`
-                                <p class="mt-1 text-sm text-blue-600">当前用户名: \${userToken.username}</p>
+                            <label class="block text-sm font-bold uppercase mb-2">集合名称</label>
+                            <input type="text" id="collectionName" value="\${collection.name}"
+                                class="bauhaus-input w-full px-4 py-3">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-bold uppercase mb-2">访问用户名</label>
+                                <input type="text" id="collectionUsername" value="\${userToken.username || ''}"
+                                    class="bauhaus-input w-full px-4 py-3">
+                                <p class="mt-2 text-sm">留空将自动生成用户名</p>
+                                \${userToken.username ? \`
+                                    <p class="mt-1 text-sm bauhaus-text-blue font-medium">
+                                        当前用户名: \${userToken.username}
+                                    </p>
+                                \` : ''}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold uppercase mb-2">访问密码</label>
+                                <input type="text" id="collectionPassword" 
+                                    class="bauhaus-input w-full px-4 py-3">
+                                <p class="mt-2 text-sm">设置后需要密码才能访问</p>
+                                \${userToken.password ? \`
+                                    <p class="mt-1 text-sm bauhaus-text-blue font-medium">
+                                        当前密码: \${userToken.password}
+                                    </p>
+                                \` : ''}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold uppercase mb-2">有效期</label>
+                            <input type="date" id="collectionExpiry" 
+                                value="\${formatDateForInput(userToken.expiry)}"
+                                class="bauhaus-input w-full px-4 py-3">
+                            <p class="mt-2 text-sm">可选，设置订阅的有效期</p>
+                            \${userToken.expiry ? \`
+                                <p class="mt-1 text-sm bauhaus-text-blue font-medium">
+                                    当前有效期: \${new Date(userToken.expiry).toLocaleDateString()}
+                                </p>
                             \` : ''}
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">访问密码</label>
-                            <input type="text" id="collectionPassword" value=""
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <p class="mt-1 text-sm text-gray-500">设置后需要密码才能访问此集合</p>
-                            \${userToken.password ? \`
-                                <p class="mt-1 text-sm text-blue-600">当前密码: \${userToken.password}</p>
-                            \` : ''}
+                            <label class="block text-sm font-bold uppercase mb-2">选择节点</label>
+                            <div class="h-60 overflow-y-auto border-2 border-black p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                \${nodes.map(node => \`
+                                    <label class="flex items-center space-x-2 p-2 border-2 border-black hover:border-blue-500 transition-colors cursor-pointer">
+                                        <input type="checkbox" value="\${node.id}" class="w-4 h-4 accent-blue-500"
+                                            \${collection.nodeIds?.includes(node.id) ? 'checked' : ''}>
+                                        <span class="text-sm uppercase">\${node.name}</span>
+                                    </label>
+                                \`).join('')}
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">有效期</label>
-                        <input type="date" id="collectionExpiry" 
-                            value="\${formatDateForInput(userToken.expiry)}"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                        <p class="mt-1 text-sm text-gray-500">可选，设置订阅的有效期</p>
-                        \${userToken.expiry ? \`
-                            <p class="mt-1 text-sm text-blue-600">
-                                当前有效期: \${new Date(userToken.expiry).toLocaleDateString()}
-                            </p>
-                        \` : ''}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">选择节点</label>
-                        <div class="max-h-60 overflow-y-auto bg-gray-50 p-4 rounded-md space-y-2">
-                            \${nodes.map(node => \`
-                                <label class="flex items-center space-x-2">
-                                    <input type="checkbox" value="\${node.id}" 
-                                        \${collection.nodeIds?.includes(node.id) ? 'checked' : ''}>
-                                    <span>\${node.name}</span>
-                                </label>
-                            \`).join('')}
-                        </div>
-                    </div>
-                    <div class="flex justify-end space-x-3 mt-6">
+                    <div class="flex justify-end space-x-4 mt-8">
                         <button onclick="this.closest('.fixed').remove()"
-                            class="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
+                            class="px-6 py-3 border-2 border-black hover:bg-black hover:text-white transition-colors uppercase">
                             取消
                         </button>
                         <button onclick="updateCollection('\${collection.id}')"
-                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">
+                            class="px-6 py-3 bauhaus-btn bauhaus-blue text-white uppercase">
                             保存
                         </button>
                     </div>
@@ -777,7 +865,7 @@ function generateCollectionScripts() {
         }
 
         async function updateCollection(id) {
-            // 获取编辑对话框中的所有输入值
+            // Get values from dialog
             const dialog = document.querySelector('.fixed');
             if (!dialog) {
                 console.error('Dialog not found');
@@ -797,6 +885,16 @@ function generateCollectionScripts() {
             const nodeIds = Array.from(dialog.querySelectorAll('input[type="checkbox"]:checked'))
                 .map(checkbox => checkbox.value);
             
+            if (!name) {
+                showToast('请输入集合名称', 'bauhaus-red');
+                return;
+            }
+            
+            if (nodeIds.length === 0) {
+                showToast('请选择至少一个节点', 'bauhaus-red');
+                return;
+            }
+            
             try {
                 const response = await fetchWithAuth('/api/collections', {
                     method: 'PUT',
@@ -814,13 +912,14 @@ function generateCollectionScripts() {
                 if (response.ok) {
                     dialog.remove();
                     await loadCollections();
+                    showToast('更新集合成功', 'bauhaus-blue');
                 } else {
                     const error = await response.json();
                     throw new Error(error.error || '更新失败');
                 }
             } catch (e) {
                 console.error('Update failed:', e);
-                alert('更新集合失败: ' + e.message);
+                showToast('更新集合失败: ' + e.message, 'bauhaus-red');
             }
         }
 
@@ -836,20 +935,21 @@ function generateCollectionScripts() {
                 
                 if (response.ok) {
                     await loadCollections();
+                    showToast('删除集合成功', 'bauhaus-yellow');
                 }
             } catch (e) {
-                alert('删除集合失败');
+                showToast('删除集合失败', 'bauhaus-red');
             }
         }
 
-        // 订阅相关函数
+        // Subscription-related functions with Bauhaus styling
         async function shareCollection(id) {
             const shareUrl = \`\${window.location.origin}/api/share/\${id}\`;
             try {
                 await navigator.clipboard.writeText(shareUrl);
-                showToast('分享链接已复制到剪贴板');
+                showToast('分享链接已复制', 'bauhaus-blue');
             } catch (e) {
-                alert('复制分享链接失败');
+                showToast('复制分享链接失败', 'bauhaus-red');
             }
         }
 
@@ -858,7 +958,7 @@ function generateCollectionScripts() {
             const subUrl = CONFIG.SUB_WORKER_URL ? 
                 \`\${CONFIG.SUB_WORKER_URL}/base?url=\${encodeURIComponent(shareUrl)}\` :
                 \`\${shareUrl}/base?internal=1\`;
-            copyToClipboard(subUrl, '通用订阅链接已复制到剪贴板');
+            copyToClipboard(subUrl, '通用订阅链接已复制');
         }
 
         function singboxSubscription(id) {
@@ -868,7 +968,7 @@ function generateCollectionScripts() {
             const subUrl = CONFIG.SUB_WORKER_URL ? 
                 \`\${CONFIG.SUB_WORKER_URL}/singbox?url=\${encodeURIComponent(shareUrl)}\${templateParam}\` :
                 \`\${shareUrl}/singbox?internal=1\`;
-            copyToClipboard(subUrl, 'SingBox订阅链接已复制到剪贴板');
+            copyToClipboard(subUrl, 'SingBox订阅链接已复制');
         }
 
         function clashSubscription(id) {
@@ -878,12 +978,12 @@ function generateCollectionScripts() {
             const subUrl = CONFIG.SUB_WORKER_URL ? 
                 \`\${CONFIG.SUB_WORKER_URL}/clash?url=\${encodeURIComponent(shareUrl)}\${templateParam}\` :
                 \`\${shareUrl}/clash?internal=1\`;
-            copyToClipboard(subUrl, 'Clash订阅链接已复制到剪贴板');
+            copyToClipboard(subUrl, 'Clash订阅链接已复制');
         }
     `;
 }
 
-// 生成工具函数脚本
+// Generate utility scripts with Bauhaus-inspired toast
 function generateUtilityScripts(env, CONFIG) {
     return `
         function openUserLogin() {
@@ -894,7 +994,7 @@ function generateUtilityScripts(env, CONFIG) {
             if (CONFIG.SUBSCRIBER_URL) {
                 window.open(CONFIG.SUBSCRIBER_URL, '_blank');
             } else {
-                showToast('订阅器地址未配置');
+                showToast('订阅器地址未配置', 'bauhaus-red');
             }
         }
 
@@ -902,25 +1002,35 @@ function generateUtilityScripts(env, CONFIG) {
             if (CONFIG.QUICK_SUB_URL) {
                 window.open(CONFIG.QUICK_SUB_URL, '_blank');
             } else {
-                showToast('快速订阅器地址未配置');
+                showToast('快速订阅器地址未配置', 'bauhaus-red');
             }
         }
 
         async function copyToClipboard(text, message) {
             try {
                 await navigator.clipboard.writeText(text);
-                showToast(message);
+                showToast(message, 'bauhaus-blue');
             } catch (e) {
-                alert('复制失败');
+                showToast('复制失败', 'bauhaus-red');
             }
         }
 
-        function showToast(message) {
+        function showToast(message, colorClass = 'bauhaus-blue') {
             const toast = document.createElement('div');
-            toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg';
+            toast.className = \`fixed bottom-8 left-1/2 transform -translate-x-1/2 \${colorClass} text-white px-6 py-3 uppercase border-2 border-black font-bold\`;
             toast.textContent = message;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
+            
+            // Create and append circle decoration
+            const circle = document.createElement('div');
+            circle.className = 'absolute -top-3 -right-3 bauhaus-circle w-6 h-6 bg-white border-2 border-black';
+            toast.appendChild(circle);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s';
+                setTimeout(() => toast.remove(), 500);
+            }, 2000);
         }
     `;
-} 
+}
